@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>给你的生日</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- 梦幻背景层 -->
+  <div class="sky">
+    <div class="nebula nebula-p"></div>
+    <div class="nebula nebula-g"></div>
+    <div class="stars"></div>
+  </div>
+
+  <!-- ========== 密码门 ========== -->
+  <section id="gate">
+    <div class="gate-box">
+      <p class="gate-hint" id="gateTitle"></p>
+      <input id="gateInput" type="password" inputmode="numeric" maxlength="8" placeholder="输入密码" />
+      <button id="gateBtn">进 入</button>
+      <p class="gate-err" id="gateErr"></p>
+    </div>
+  </section>
+
+  <!-- ========== 应用 ========== -->
+  <div id="app" class="hidden">
+
+    <header class="topbar">
+      <button class="back-btn" id="backBtn">‹ 主页</button>
+      <span class="topbar-title" id="topbarTitle"></span>
+    </header>
+
+    <!-- ===== 主页（枢纽 / 游戏式主菜单） ===== -->
+    <section class="view active" id="view-home">
+      <div class="hub">
+        <div class="hub-core">
+          <div class="moon"></div>
+          <p class="hero-greet" id="heroGreet"></p>
+          <div class="timer" id="timer"></div>
+          <div class="hero-meta">
+            <span id="distLine"></span><span class="dot">·</span><span id="bday"></span>
+          </div>
+        </div>
+        <nav class="portals" id="cards"><!-- 入口由 JS 生成 --></nav>
+        <footer class="home-foot">
+          <span class="star-egg" id="starEgg" title="?">✦</span>
+          <p>made with love</p>
+        </footer>
+      </div>
+    </section>
+
+    <!-- ===== 时间线 ===== -->
+    <section class="view" id="view-timeline">
+      <h2 class="view-h">我们的故事</h2>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- ===== 地图（省份） ===== -->
+    <section class="view" id="view-map">
+      <h2 class="view-h">我们去过的地方</h2>
+      <p class="view-tip">发光的省份是我们一起的回忆 · 点一下看那里的相册</p>
+      <div id="map"></div>
+    </section>
+
+    <!-- ===== 相册 ===== -->
+    <section class="view" id="view-gallery">
+      <h2 class="view-h">我们的相册</h2>
+      <button class="proj-btn" id="projBtn">🌙 投影模式</button>
+      <p class="view-tip">点照片放大 · 投影模式自动轮播</p>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <!-- ===== 她的摄影 ===== -->
+    <section class="view" id="view-her">
+      <h2 class="view-h">你眼里的世界</h2>
+      <p class="view-tip">她的摄影作品</p>
+      <div class="gallery" id="herGallery"></div>
+    </section>
+
+    <!-- ===== 信 ===== -->
+    <section class="view" id="view-letter">
+      <h2 class="view-h">写给你的信</h2>
+      <div class="letter" id="letter"></div>
+      <div class="lyrics" id="lyrics"></div>
+    </section>
+
+    <!-- ===== 睡前 ===== -->
+    <section class="view sleep-sec" id="view-sleep">
+      <h2 class="view-h">晚安</h2>
+      <div class="sleep" id="sleep"></div>
+    </section>
+
+  </div>
+
+  <!-- ===== 音乐播放器 ===== -->
+  <div class="player hidden" id="player">
+    <div class="player-bar">
+      <button class="pl-btn" id="plPrev" title="上一首">⏮</button>
+      <button class="pl-btn pl-play" id="plPlay" title="播放/暂停">▶</button>
+      <button class="pl-btn" id="plNext" title="下一首">⏭</button>
+      <span class="pl-title" id="plTitle">选择音乐 ♪</span>
+      <button class="pl-btn" id="plList" title="歌单">☰</button>
+    </div>
+    <div class="player-list" id="playerList"></div>
+  </div>
+  <audio id="audio"></audio>
+
+  <!-- ===== 大图 / 投影 ===== -->
+  <div class="lightbox hidden" id="lightbox">
+    <button class="lb-close" id="lbClose">✕</button>
+    <button class="lb-prev" id="lbPrev">‹</button>
+    <img id="lbImg" src="" alt="" />
+    <p class="lb-cap" id="lbCap"></p>
+    <button class="lb-next" id="lbNext">›</button>
+  </div>
+
+  <!-- ===== 悄悄话 ===== -->
+  <div class="secret-box hidden" id="secretBox">
+    <p id="secretText"></p>
+    <button id="secretClose">收下了 ♡</button>
+  </div>
+
+  <!-- 编辑模式按钮（左下角齿轮，需编辑密码） -->
+  <button class="edit-btn hidden" id="editBtn" title="编辑模式">⚙</button>
+  <div class="toast hidden" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
