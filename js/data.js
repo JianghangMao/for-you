@@ -30,6 +30,18 @@ const DATA = {
     {
       name: "北京", date: "你在的地方", note: "北京，你在的城市。",
       photos: ["photos/bj1.jpg"]
+    },
+    {
+      name: "湖北", date: "", note: "武汉，一起走过的城市。",
+      photos: []
+    },
+    {
+      name: "山东", date: "", note: "济南，一起走过的城市。",
+      photos: []
+    },
+    {
+      name: "吉林", date: "", note: "长春与吉林，一起走过的城市。",
+      photos: []
     }
     // {
     //   name: "云南", date: "2024.暑假", note: "一起去看的风景。",
