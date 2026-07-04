@@ -98,6 +98,34 @@ const DATA = {
   ],
 
   /* ---------- 8. 隐藏悄悄话彩蛋（连点页脚星星出现） ---------- */
-  secret: "其实，我每天醒来第一件事，就是想你。"
+  secret: "其实，我每天醒来第一件事，就是想你。",
+
+  /* ---------- 9. 重要日子倒数 ----------
+     type 固定写 "countdown"。
+     date 日期，格式 "2026-07-10"。
+     repeat 是否每年重复："yearly"（生日/纪念日用）或 ""（一次性）。 */
+  days: [
+    { label: "你的生日", date: "2026-07-10", repeat: "yearly", emoji: "🎂" },
+    { label: "我们在一起", date: "2026-03-28", repeat: "yearly", emoji: "💕" },
+    { label: "下次见面", date: "2026-08-15", repeat: "", emoji: "✈️" }
+    // { label: "自定义", date: "2026-xx-xx", repeat: "", emoji: "✨" },
+  ],
+
+  /* ---------- 10. 想一起做的100件事 ----------
+     done: true 表示已完成，false 表示还没做。
+     勾选状态会自动存在浏览器本地（换设备不通用，但同一设备持久）。 */
+  wishlist: [
+    { text: "一起看一次日出", done: false },
+    { text: "一起看一次日落", done: false },
+    { text: "一起去海边", done: false },
+    { text: "一起坐摩天轮", done: false },
+    { text: "一起吃一顿火锅", done: false },
+    { text: "一起看一场演唱会", done: false },
+    { text: "一起拍一组情侣照", done: false },
+    { text: "一起养一株植物", done: false },
+    { text: "一起做一顿饭", done: false },
+    { text: "一起看一场雪", done: false }
+    // 继续加，照着上面格式复制一行，
+  ]
 
 };

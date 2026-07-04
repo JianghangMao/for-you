@@ -13,6 +13,8 @@ const SECTIONS = [
   { id:"her",      icon:"🌷", title:"你眼里的世界", sub:"她的摄影",        size:"" },
   { id:"letter",   icon:"✉️", title:"写给你的信", sub:"生日电子情书",     size:"wide" },
   { id:"sleep",    icon:"🌙", title:"晚安",       sub:"睡前想对你说的话",  size:"wide" },
+  { id:"days",     icon:"📅", title:"重要日子",   sub:"值得期待的日子",    size:"" },
+  { id:"wish",     icon:"✨", title:"想做的事",   sub:"一起完成的清单",    size:"" },
 ];
 
 /* ---------- 密码门 ---------- */
@@ -57,6 +59,8 @@ function boot(){
   $("lyrics").innerHTML = DATA.lyrics.map(p => `<p>${p}</p>`).join("");
   $("sleep").innerHTML  = DATA.sleepText.map(p => `<p>${p}</p>`).join("");
   $("secretText").textContent = DATA.secret;
+  renderDays();
+  renderWishlist();
   $("editBtn").classList.remove("hidden");
 
   route();
@@ -345,3 +349,64 @@ function showCityPanel(prov){
   });
 }
 $("cityPanelClose").addEventListener("click", () => $("cityPanel").classList.add("hidden"));
+
+/* ---------- 重要日子倒数 ---------- */
+function renderDays(){
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  $("daysGrid").innerHTML = DATA.days.map(d => {
+    const base = new Date(d.date + "T00:00:00");
+    let target = new Date(today.getFullYear(), base.getMonth(), base.getDate());
+    if (target < today && d.repeat === "yearly") target.setFullYear(now.getFullYear() + 1);
+    if (target < today && d.repeat !== "yearly") target = base;
+    const diff = Math.round((target - today) / 86400000);
+    const isToday = diff === 0;
+    const passed = diff < 0 && d.repeat !== "yearly";
+    let num, unit, label;
+    if (isToday){
+      num = "🎉"; unit = "就是今天"; label = d.label;
+    } else if (passed){
+      num = Math.abs(diff); unit = "天前"; label = d.label;
+    } else {
+      num = diff; unit = "天后"; label = d.label;
+    }
+    return `
+      <div class="day-card ${isToday ? 'today' : ''} ${passed ? 'past' : ''}">
+        <div class="day-emoji">${d.emoji || "📅"}</div>
+        <div class="day-label">${label}</div>
+        <div class="day-num">${num}</div>
+        <div class="day-unit">${unit}</div>
+        <div class="day-date">${target.getFullYear()}.${pad(target.getMonth()+1)}.${pad(target.getDate())}</div>
+      </div>`;
+  }).join("");
+}
+
+/* ---------- 想一起做的事（本地存储勾选） ---------- */
+const WISH_KEY = "wishlist_done";
+function getWishDone(){
+  try { return JSON.parse(localStorage.getItem(WISH_KEY)) || {}; } catch { return {}; }
+}
+function renderWishlist(){
+  const done = getWishDone();
+  let count = 0;
+  $("wishlist").innerHTML = DATA.wishlist.map((w, i) => {
+    const isDone = done[i] || w.done;
+    if (isDone) count++;
+    return `
+      <label class="wish-item ${isDone ? 'done' : ''}">
+        <input type="checkbox" data-i="${i}" ${isDone ? 'checked' : ''}>
+        <span class="wish-check"></span>
+        <span class="wish-text">${w.text}</span>
+      </label>`;
+  }).join("");
+  $("wishProgress").textContent = `已完成 ${count} / ${DATA.wishlist.length}`;
+  $("wishlist").querySelectorAll("input[type=checkbox]").forEach(cb => {
+    cb.addEventListener("change", e => {
+      const i = +e.target.dataset.i;
+      const done = getWishDone();
+      done[i] = e.target.checked;
+      localStorage.setItem(WISH_KEY, JSON.stringify(done));
+      renderWishlist();
+    });
+  });
+}
