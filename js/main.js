@@ -295,10 +295,12 @@ let curTrack = -1;
 $("playerList").innerHTML = CONFIG.music.map((m,i) => `<button data-i="${i}">♪ ${m.title}</button>`).join("");
 function playTrack(i){
   curTrack = i;
-  audio.src = CONFIG.music[i].file;
+  const t = CONFIG.music[i];
+  audio.src = t.file;
+  audio.onerror = () => { if (t.cloud && !audio.dataset.fallback){ audio.dataset.fallback = "1"; audio.src = t.cloud; } };
   audio.play().catch(()=>{});
   $("plPlay").textContent = "❚❚";
-  $("plTitle").textContent = CONFIG.music[i].title;
+  $("plTitle").textContent = t.title;
   $("playerList").querySelectorAll("button").forEach((b,bi)=> b.classList.toggle("playing", bi===i));
 }
 $("plPlay").addEventListener("click", () => {
