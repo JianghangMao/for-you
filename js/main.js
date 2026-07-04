@@ -296,8 +296,15 @@ $("playerList").innerHTML = CONFIG.music.map((m,i) => `<button data-i="${i}">♪
 function playTrack(i){
   curTrack = i;
   const t = CONFIG.music[i];
+  delete audio.dataset.fallback;
+  audio.onerror = () => {
+    if (t.cloud && !audio.dataset.fallback){
+      audio.dataset.fallback = "1";
+      audio.src = t.cloud;
+      audio.play().catch(()=>{});
+    }
+  };
   audio.src = t.file;
-  audio.onerror = () => { if (t.cloud && !audio.dataset.fallback){ audio.dataset.fallback = "1"; audio.src = t.cloud; } };
   audio.play().catch(()=>{});
   $("plPlay").textContent = "❚❚";
   $("plTitle").textContent = t.title;
