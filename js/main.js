@@ -254,8 +254,9 @@ function initMap(){
   if (chart) return;
   chart = echarts.init($("map"));
   chart.showLoading({ text:"地图加载中…", textColor:"#a59ec8", maskColor:"rgba(11,10,24,0)", color:"#84e8c0" });
-  fetch("https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json")
+  fetch("assets/vendor/china.json")
     .then(r => r.json())
+    .catch(() => fetch("https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json").then(r => r.json()))
     .then(geo => {
       echarts.registerMap("china", geo);
       const fullByCore = {};
