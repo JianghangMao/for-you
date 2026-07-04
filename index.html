@@ -63,9 +63,16 @@
     <!-- ===== 地图（省份） ===== -->
     <section class="view" id="view-map">
       <h2 class="view-h">我们去过的地方</h2>
-      <p class="view-tip">发光的省份是我们一起的回忆 · 点一下看那里的相册</p>
+      <p class="view-tip">发光的省份是我们一起的回忆 · 点省份看去过的城市</p>
       <div id="map"></div>
     </section>
+
+    <!-- ===== 城市选择面板（点省份后弹出） ===== -->
+    <div class="city-panel hidden" id="cityPanel">
+      <button class="city-panel-close" id="cityPanelClose">✕</button>
+      <h3 class="city-panel-title" id="cityPanelTitle"></h3>
+      <div class="city-list" id="cityList"></div>
+    </div>
 
     <!-- ===== 相册 ===== -->
     <section class="view" id="view-gallery">

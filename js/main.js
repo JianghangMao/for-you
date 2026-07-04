@@ -281,8 +281,7 @@ function initMap(){
       });
       chart.on("click", pr => {
         const v = visited.find(x => x.full === pr.name);
-        if (v && v.p.photos && v.p.photos.length)
-          openLightbox(v.p.photos.map(src => ({ src, caption: v.p.note || v.p.name })), 0, false);
+        if (v) showCityPanel(v.p);
       });
     })
     .catch(() => { chart.hideLoading();
@@ -322,3 +321,27 @@ $("starEgg").addEventListener("click", () => {
   if (eggCount >= 3){ eggCount=0; $("secretBox").classList.remove("hidden"); }
 });
 $("secretClose").addEventListener("click", () => $("secretBox").classList.add("hidden"));
+
+/* ---------- 城市选择面板（点省份后弹出） ---------- */
+function showCityPanel(prov){
+  $("cityPanelTitle").textContent = prov.name;
+  const cities = prov.cities || [];
+  $("cityList").innerHTML = cities.map((c, i) => `
+    <button class="city-card" data-i="${i}">
+      <span class="city-name">${c.name}</span>
+      <span class="city-note">${c.note || ""}</span>
+      <span class="city-count">${(c.photos||[]).length} 张照片</span>
+    </button>`).join("");
+  $("cityPanel").classList.remove("hidden");
+  $("cityList").querySelectorAll(".city-card").forEach((b, i) => {
+    b.addEventListener("click", () => {
+      const c = cities[i];
+      if (c.photos && c.photos.length){
+        openLightbox(c.photos.map(src => ({ src, caption: c.note || c.name })), 0, false);
+      } else {
+        toast("这里还没有照片哦");
+      }
+    });
+  });
+}
+$("cityPanelClose").addEventListener("click", () => $("cityPanel").classList.add("hidden"));

@@ -17,31 +17,41 @@ const DATA = {
     // { date: "2024.xx.xx", title: "标题", text: "内容", photo: "photos/xx.jpg" },
   ],
 
-  /* ---------- 2. 去过的省份（地图上会点亮，点进去看相册） ----------
-     name 要写省/直辖市名（可写简称"浙江"或全称"浙江省"都行）。
-     常见：北京 / 上海 / 天津 / 重庆 / 浙江 / 江苏 / 广东 / 四川 / 云南 /
-            陕西 / 湖南 / 福建 / 山东 / 内蒙古 / 新疆 / 西藏 / 香港 / 澳门 …
-     date 时间，note 一句话，photos 在这个省拍的照片（可多张，点省份弹出）。 */
+  /* ---------- 2. 去过的省份（地图上会点亮，点进去看城市相册） ----------
+     name 省份名（"浙江"或"浙江省"都行）。
+     cities 数组：该省去过的城市，每个城市有 name/note/photos。
+     date 时间，note 鼠标悬停显示的一句话。 */
   provinces: [
     {
       name: "浙江", date: "我在的地方", note: "杭州，我们的城市之一。",
-      photos: ["photos/zj1.jpg"]
+      cities: [
+        { name: "杭州", note: "我在这里", photos: ["photos/zj1.jpg"] }
+      ]
     },
     {
       name: "北京", date: "你在的地方", note: "北京，你在的城市。",
-      photos: ["photos/bj1.jpg"]
+      cities: [
+        { name: "北京", note: "你在的地方", photos: ["photos/bj1.jpg"] }
+      ]
     },
     {
       name: "湖北", date: "", note: "武汉，一起走过的城市。",
-      photos: []
+      cities: [
+        { name: "武汉", note: "", photos: [] }
+      ]
     },
     {
       name: "山东", date: "", note: "济南，一起走过的城市。",
-      photos: []
+      cities: [
+        { name: "济南", note: "", photos: [] }
+      ]
     },
     {
       name: "吉林", date: "", note: "长春与吉林，一起走过的城市。",
-      photos: []
+      cities: [
+        { name: "长春", note: "", photos: [] },
+        { name: "吉林", note: "", photos: [] }
+      ]
     }
     // {
     //   name: "云南", date: "2024.暑假", note: "一起去看的风景。",
