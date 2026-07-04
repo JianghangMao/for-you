@@ -45,9 +45,9 @@ const CONFIG = {
      —— file 是音频文件路径，把 mp3 放进 music 文件夹，名字对上即可。 */
   music: [
     { title: "星茶会",       file: "music/xingchahui.mp3",
-      cloud: "https://lrqvtmvviawkbttxkrwq.supabase.co/storage/v1/object/public/photos/music/xingchahui.mp3" },
+      cloud: "https://lrqvtmvviawkbttxkrwq.supabase.co/storage/v1/object/public/music/xingchahui.mp3" },
     { title: "Flower Dance", file: "music/flower-dance.mp3",
-      cloud: "https://lrqvtmvviawkbttxkrwq.supabase.co/storage/v1/object/public/photos/music/flower-dance.mp3" }
+      cloud: "https://lrqvtmvviawkbttxkrwq.supabase.co/storage/v1/object/public/music/flower-dance.mp3" }
     // { title: "好想爱这个世界啊", file: "music/haoxiang.mp3" },
   ]
 
