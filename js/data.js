@@ -120,17 +120,31 @@ const DATA = {
      done: true 表示已完成，false 表示还没做。
      勾选状态会自动存在浏览器本地（换设备不通用，但同一设备持久）。 */
   wishlist: [
-    { text: "一起看一次日出", done: false },
-    { text: "一起看一次日落", done: false },
-    { text: "一起去海边", done: false },
-    { text: "一起坐摩天轮", done: false },
-    { text: "一起吃一顿火锅", done: false },
-    { text: "一起看一场华晨宇演唱会", done: false },
-    { text: "一起认真拍一组照片", done: false },
-    { text: "一起养一株植物", done: false },
-    { text: "狗狗做一顿饭给宝宝吃", done: false },
-    { text: "一起看一场雪", done: false }
-    // 继续加，照着上面格式复制一行，
+    { text: "color walk", done: false },
+    { text: "一起拍写真（好奇狗狗汉服女装）", done: false },
+    { text: "爬山看日出", done: false },
+    { text: "去看演唱会", done: false },
+    { text: "游乐园gogogo！", done: false },
+    { text: "一起做饭（啊呜好期待）", done: false },
+    { text: "做陶艺", done: false },
+    { text: "去看海", done: false },
+    { text: "一起公园野餐", done: false },
+    { text: "一起泡澡（正规店那种，！不许想歪）", done: false },
+    { text: "一起游泳", done: false },
+    { text: "上甜品课", done: false },
+    { text: "果园摘水果", done: false },
+    { text: "猫咖撸猫", done: false },
+    { text: "一起玩真心话大冒险", done: false },
+    { text: "一起养花花草草（能互寄就好了）", done: false },
+    { text: "互相给对方制定行程", done: false },
+    { text: "一起逛超市（低于预期就买）", done: false },
+    { text: "人生九宫格", done: false },
+    { text: "一起拍平行生活vlog", done: false },
+    { text: "一起学无用小技能", done: false },
+    { text: "创建歌单", done: false },
+    { text: "给对方写四季信件", done: false },
+    { text: "云规划未来小窝", done: false },
+    { text: "一起设计T恤", done: false }
   ]
 
 };
