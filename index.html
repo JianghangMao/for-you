@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>给你的生日</title>
+  <title>宝宝生日快乐</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
     <div class="gate-box">
       <p class="gate-hint" id="gateTitle"></p>
       <input id="gateInput" type="password" inputmode="numeric" maxlength="8" placeholder="输入密码" />
-      <button id="gateBtn">进 入</button>
+      <button id="gateBtn">进入</button>
       <p class="gate-err" id="gateErr"></p>
     </div>
   </section>
@@ -49,7 +49,7 @@
         <nav class="portals" id="cards"><!-- 入口由 JS 生成 --></nav>
         <footer class="home-foot">
           <span class="star-egg" id="starEgg" title="?">✦</span>
-          <p>made with love</p>
+          <p>from 狗狗</p>
         </footer>
       </div>
     </section>
@@ -63,7 +63,7 @@
     <!-- ===== 地图（省份） ===== -->
     <section class="view" id="view-map">
       <h2 class="view-h">我们去过的地方</h2>
-      <p class="view-tip">发光的省份是我们一起的回忆 · 点省份看去过的城市</p>
+      <p class="view-tip">发光的是我们已经走过、或正在生活的地方</p>
       <div id="map"></div>
     </section>
 
@@ -78,14 +78,14 @@
     <section class="view" id="view-gallery">
       <h2 class="view-h">我们的相册</h2>
       <button class="proj-btn" id="projBtn">🌙 投影模式</button>
-      <p class="view-tip">点照片放大 · 投影模式自动轮播</p>
+      <p class="view-tip">点照片放大 · 投影模式会自动轮播</p>
       <div class="gallery" id="gallery"></div>
     </section>
 
     <!-- ===== 她的摄影 ===== -->
     <section class="view" id="view-her">
       <h2 class="view-h">你眼里的世界</h2>
-      <p class="view-tip">她的摄影作品</p>
+      <p class="view-tip">宝宝拍到的世界</p>
       <div class="gallery" id="herGallery"></div>
     </section>
 
@@ -105,14 +105,14 @@
     <!-- ===== 重要日子倒数 ===== -->
     <section class="view" id="view-days">
       <h2 class="view-h">重要日子</h2>
-      <p class="view-tip">那些值得期待的日子，都在这里倒数着</p>
+      <p class="view-tip">见面、生日、纪念日，都慢慢数着</p>
       <div class="days-grid" id="daysGrid"></div>
     </section>
 
     <!-- ===== 想一起做的事 ===== -->
     <section class="view" id="view-wish">
       <h2 class="view-h">想和你一起做的事</h2>
-      <p class="view-tip">一件一件来，慢慢陪你做完</p>
+      <p class="view-tip">不急，一件一件来</p>
       <div class="wish-progress"><span id="wishProgress"></span></div>
       <div class="wishlist" id="wishlist"></div>
     </section>
@@ -144,7 +144,7 @@
   <!-- ===== 悄悄话 ===== -->
   <div class="secret-box hidden" id="secretBox">
     <p id="secretText"></p>
-    <button id="secretClose">收下了 ♡</button>
+    <button id="secretClose">知道啦</button>
   </div>
 
   <!-- 编辑模式按钮（左下角齿轮，需编辑密码） -->

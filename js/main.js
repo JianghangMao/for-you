@@ -7,14 +7,14 @@ const $ = (id) => document.getElementById(id);
 /* ---------- 主页入口定义（顺序/文字/大小 改这里即可）
    size 可填 "lg"(大块) / "wide"(宽块) / ""(普通) ---------- */
 const SECTIONS = [
-  { id:"map",      icon:"🌍", title:"去过的地方", sub:"点亮我们走过的省份", size:"lg" },
-  { id:"gallery",  icon:"📷", title:"我们的相册", sub:"含投影模式",       size:"wide" },
-  { id:"timeline", icon:"🕰", title:"我们的故事", sub:"恋爱时间线",       size:"" },
-  { id:"her",      icon:"🌷", title:"你眼里的世界", sub:"她的摄影",        size:"" },
-  { id:"letter",   icon:"✉️", title:"写给你的信", sub:"生日电子情书",     size:"wide" },
-  { id:"sleep",    icon:"🌙", title:"晚安",       sub:"睡前想对你说的话",  size:"wide" },
-  { id:"days",     icon:"📅", title:"重要日子",   sub:"值得期待的日子",    size:"" },
-  { id:"wish",     icon:"✨", title:"想做的事",   sub:"一起完成的清单",    size:"" },
+  { id:"map",      icon:"🌍", title:"去过的地方", sub:"把坐标慢慢点亮",     size:"lg" },
+  { id:"gallery",  icon:"📷", title:"我们的相册", sub:"一些真实的瞬间",     size:"wide" },
+  { id:"timeline", icon:"🕰", title:"我们的故事", sub:"从同桌到异地",       size:"" },
+  { id:"her",      icon:"🌷", title:"你眼里的世界", sub:"宝宝拍到的生活",    size:"" },
+  { id:"letter",   icon:"✉️", title:"写给你的信", sub:"狗狗认真写的",       size:"wide" },
+  { id:"sleep",    icon:"🌙", title:"晚安",       sub:"宿舍吵也慢慢睡",      size:"wide" },
+  { id:"days",     icon:"📅", title:"重要日子",   sub:"见面和纪念日",        size:"" },
+  { id:"wish",     icon:"✨", title:"想做的事",   sub:"不急，一件件来",      size:"" },
 ];
 
 /* ---------- 密码门 ---------- */
@@ -26,7 +26,7 @@ function tryEnter(){
     $("player").classList.remove("hidden");
     boot();
   } else {
-    $("gateErr").textContent = "密码不对哦，再想想～";
+    $("gateErr").textContent = "密码不对，饱饱再想想";
     $("gateInput").value = "";
   }
 }
@@ -36,7 +36,7 @@ $("gateInput").addEventListener("keydown", e => { if (e.key === "Enter") tryEnte
 /* ---------- 启动渲染 ---------- */
 function boot(){
   // 主页文字
-  $("heroGreet").textContent = `亲爱的 ${CONFIG.herName}，${CONFIG.coverSubtitle}`;
+  $("heroGreet").textContent = `${CONFIG.herName}，${CONFIG.coverSubtitle}`;
   $("distLine").innerHTML = `${CONFIG.cityA.name} <b>${CONFIG.distanceKm}km</b> ${CONFIG.cityB.name}`;
   updateTimer(); setInterval(updateTimer, 1000);
   updateBday();
@@ -91,7 +91,7 @@ function updateTimer(){
   const days = Math.floor(diff/86400); diff -= days*86400;
   const h = Math.floor(diff/3600); diff -= h*3600;
   const m = Math.floor(diff/60); const s = diff - m*60;
-  $("timer").innerHTML = `我们已经相爱 <b>${days}</b> 天 <b>${pad(h)}</b>:<b>${pad(m)}</b>:<b>${pad(s)}</b>`;
+  $("timer").innerHTML = `我们在一起 <b>${days}</b> 天 <b>${pad(h)}</b>:<b>${pad(m)}</b>:<b>${pad(s)}</b>`;
 }
 
 /* ---------- 生日倒计时 ---------- */
@@ -103,8 +103,8 @@ function updateBday(){
   const age = next.getFullYear() - bd.getFullYear();
   const days = Math.round((next - today)/86400000);
   $("bday").innerHTML = days === 0
-    ? `🎂 今天是你的 <b>${age}</b> 岁生日！`
-    : `距你 <b>${age}</b> 岁生日还有 <b>${days}</b> 天`;
+    ? `🎂 今天宝宝 <b>${age}</b> 岁啦`
+    : `距宝宝 <b>${age}</b> 岁生日还有 <b>${days}</b> 天`;
 }
 
 /* ---------- 时间线 ---------- */
@@ -179,7 +179,7 @@ async function handleUpload(elId, files){
       }
     } catch (err){ console.warn(err); toast("上传失败：" + (err.message || "请检查 Supabase 配置")); return; }
   }
-  toast(Cloud.enabled ? "已上传到云端 ♡" : "已添加（本地）♡");
+  toast(Cloud.enabled ? "已上传到云端" : "已添加到本地");
   renderGallery(elId);
 }
 

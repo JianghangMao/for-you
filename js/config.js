@@ -22,8 +22,8 @@ const CONFIG = {
   },
 
   /* 称呼 */
-  herName: "宝贝",      // 她的名字/昵称
-  myName: "我",         // 你的名字/昵称
+  herName: "宝宝",      // 她的名字/昵称
+  myName: "狗狗",       // 你的名字/昵称
 
   /* 纪念日：在一起的那天（格式 年-月-日，别改横杠） */
   anniversary: "2023-03-28",
@@ -37,8 +37,8 @@ const CONFIG = {
   distanceKm: 1230,   // 两地直线距离，大概数就行
 
   /* 首页副标题 */
-  coverTitle: "写给我最爱的你",
-  coverSubtitle: "十九岁生日快乐",
+  coverTitle: "生日快乐",
+  coverSubtitle: "给饱饱的一小片宇宙",
 
   /* 背景音乐歌单
      —— 以后想加歌（比如华晨宇），照着下面复制一行就行。
