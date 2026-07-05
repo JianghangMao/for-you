@@ -68,6 +68,7 @@ function boot(){
 
 /* ---------- 路由：主页 <-> 板块 ---------- */
 const VIEWS = ["home", ...SECTIONS.map(s => s.id)];
+let pendingGalleryScroll = null;   // 地图跳相册时记录要滚动到的地点
 function route(){
   let h = location.hash.replace("#","") || "home";
   if (!VIEWS.includes(h)) h = "home";
@@ -78,6 +79,18 @@ function route(){
   $("topbarTitle").textContent = sec ? sec.title : "";
   $("view-" + h).scrollTop = 0;
   if (h === "map"){ initMap(); setTimeout(() => chart && chart.resize(), 220); }
+  // 从地图跳过来：滚动到对应地点分组并高亮一下
+  if (h === "gallery" && pendingGalleryScroll){
+    const target = pendingGalleryScroll;
+    pendingGalleryScroll = null;
+    setTimeout(() => {
+      const el = document.getElementById("gg-" + encodeURIComponent(target));
+      if (!el) return;
+      el.scrollIntoView({ behavior:"smooth", block:"start" });
+      el.classList.add("flash");
+      setTimeout(() => el.classList.remove("flash"), 1600);
+    }, 350);
+  }
 }
 window.addEventListener("resize", () => chart && chart.resize());
 window.addEventListener("hashchange", route);
@@ -131,25 +144,47 @@ async function renderGallery(elId){
   const local = await Store.byAlbum(meta.album);
   const list = [
     ...meta.base(),
-    ...cloud.map(c => ({ src:c.src, caption:c.caption, _id:c.id, _src:"cloud", _path:c.path })),
-    ...local.map(p => ({ src:p.src, caption:p.caption||"", _id:p.id, _src:"local" })),
+    ...cloud.map(c => ({ src:c.src, caption:c.caption, place:c.place||"", _id:c.id, _src:"cloud", _path:c.path })),
+    ...local.map(p => ({ src:p.src, caption:p.caption||"", place:p.place||"", _id:p.id, _src:"local" })),
   ];
   albumCache[elId] = list;
 
-  let html = list.map((g,i) => `
+  const figureHTML = (g, i) => `
     <figure data-i="${i}">
       <img src="${g.src}" alt="" onerror="this.src='assets/placeholder.svg'">
       ${editMode && g._id ? `<button class="del" data-id="${g._id}" data-src="${g._src}" data-path="${g._path||""}">✕</button>` : ""}
-    </figure>`).join("");
+    </figure>`;
+
+  let html = "";
+  if (elId === "gallery" && list.length){
+    // 按地点分组：有 place 的按 place 分，没 place 的归"日常"放最后
+    const groups = {};
+    list.forEach((g, i) => {
+      const p = g.place || "日常";
+      (groups[p] = groups[p] || []).push({ g, i });
+    });
+    const names = Object.keys(groups).filter(n => n !== "日常");
+    if (groups["日常"]) names.push("日常");
+    names.forEach(name => {
+      const items = groups[name];
+      html += `<div class="gallery-group" id="gg-${encodeURIComponent(name)}">`;
+      html += `<h3 class="gg-title">${name}<span class="gg-count">${items.length}</span></h3>`;
+      html += `<div class="gallery-grid">`;
+      items.forEach(it => { html += figureHTML(it.g, it.i); });
+      html += `</div></div>`;
+    });
+  } else {
+    html += `<div class="gallery-grid">` + list.map((g,i) => figureHTML(g, i)).join("") + `</div>`;
+  }
   if (editMode)
-    html += `<label class="add-tile"><span>＋</span>添加照片
-      <input type="file" accept="image/*" multiple hidden></label>`;
+    html += `<div class="gallery-grid"><label class="add-tile"><span>＋</span>添加照片
+      <input type="file" accept="image/*" multiple hidden></label></div>`;
   $(elId).innerHTML = html;
 
   $(elId).querySelectorAll("figure").forEach(f => {
     const i = +f.dataset.i;
     f.querySelector("img").addEventListener("click", () => {
-      if (editMode) editCaption(elId, i);
+      if (editMode) editItem(elId, i);
       else openLightbox(albumCache[elId], i, false);
     });
   });
@@ -167,15 +202,20 @@ async function renderGallery(elId){
 
 async function handleUpload(elId, files){
   if (!files || !files.length) return;
+  // gallery 相册上传时问一下拍在哪个城市（留空=日常分组）
+  let place = "";
+  if (elId === "gallery"){
+    place = (prompt("这批照片拍在哪个城市？（留空归到\"日常\"分组）", "") || "").trim();
+  }
   toast(`正在添加 ${files.length} 张…`);
   for (const file of files){
     try {
       if (Cloud.enabled){
         const blob = await fileToBlob(file);
-        if (blob) await Cloud.upload(ALBUMS[elId].album, blob, "");
+        if (blob) await Cloud.upload(ALBUMS[elId].album, blob, "", place);
       } else {
         const src = await fileToDataURL(file);
-        if (src) await Store.add({ album: ALBUMS[elId].album, src, caption:"", ts: Date.now() });
+        if (src) await Store.add({ album: ALBUMS[elId].album, src, caption:"", place, ts: Date.now() });
       }
     } catch (err){ console.warn(err); toast("上传失败：" + (err.message || "请检查 Supabase 配置")); return; }
   }
@@ -183,17 +223,21 @@ async function handleUpload(elId, files){
   renderGallery(elId);
 }
 
-async function editCaption(elId, i){
+async function editItem(elId, i){
   const g = albumCache[elId][i];
-  if (!g._id){ toast("内置照片的文字请在 data.js 里改"); return; }
+  if (!g._id){ toast("内置照片的文字和地点请在 data.js 里改"); return; }
   const cap = prompt("给这张照片写一句旁白：", g.caption || "");
   if (cap === null) return;
+  let place = g.place || "";
+  if (elId === "gallery"){
+    place = (prompt("拍在哪个城市？（留空归到\"日常\"分组）", g.place || "") || "").trim();
+  }
   if (g._src === "cloud"){
-    await Cloud.updateCaption(g._id, cap);
+    await Cloud.updateMeta(g._id, cap, place);
   } else {
     const local = await Store.byAlbum(ALBUMS[elId].album);
     const rec = local.find(p => p.id === g._id);
-    if (rec){ rec.caption = cap; await Store.update(rec); }
+    if (rec){ rec.caption = cap; rec.place = place; await Store.update(rec); }
   }
   renderGallery(elId); toast("已保存");
 }
@@ -330,21 +374,23 @@ $("secretClose").addEventListener("click", () => $("secretBox").classList.add("h
 function showCityPanel(prov){
   $("cityPanelTitle").textContent = prov.name;
   const cities = prov.cities || [];
-  $("cityList").innerHTML = cities.map((c, i) => `
+  const gal = albumCache["gallery"] || [];
+  $("cityList").innerHTML = cities.map((c, i) => {
+    const n = gal.filter(g => (g.place || "日常") === c.name).length;
+    return `
     <button class="city-card" data-i="${i}">
       <span class="city-name">${c.name}</span>
       <span class="city-note">${c.note || ""}</span>
-      <span class="city-count">${(c.photos||[]).length} 张照片</span>
-    </button>`).join("");
+      <span class="city-count">${n ? `相册里 ${n} 张` : "去相册看看"}</span>
+    </button>`;
+  }).join("");
   $("cityPanel").classList.remove("hidden");
   $("cityList").querySelectorAll(".city-card").forEach((b, i) => {
     b.addEventListener("click", () => {
       const c = cities[i];
-      if (c.photos && c.photos.length){
-        openLightbox(c.photos.map(src => ({ src, caption: c.note || c.name })), 0, false);
-      } else {
-        toast("这里还没有照片哦");
-      }
+      pendingGalleryScroll = c.name;
+      $("cityPanel").classList.add("hidden");
+      location.hash = "gallery";
     });
   });
 }

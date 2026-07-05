@@ -1,2 +1,6 @@
 music/*.mp3
 _export_chats.js
+node_modules/
+package.json
+package-lock.json
+_*.js

@@ -50,8 +50,7 @@ const DATA = {
     {
       name: "吉林", date: "", note: "长春与吉林，路远一点，记忆也更清楚一点。",
       cities: [
-        { name: "长春", note: "", photos: [] },
-        { name: "吉林", note: "", photos: [] }
+        { name: "长春吉林", note: "一次寒假的远行，照片多到挑不过来。", photos: [] }
       ]
     }
     // {
@@ -61,12 +60,13 @@ const DATA = {
   ],
 
   /* ---------- 3. 总相册（投影模式轮播也用这里） ----------
-     src 照片路径，caption 是你给这张照片写的旁白（投影时会显示）。 */
+     src 照片路径，caption 旁白（投影时显示），place 拍照的城市/地点（留空=归到"日常"分组）。
+     place 写城市名（如"杭州"），相册会按地点分组；地图点城市也会跳到对应分组。 */
   gallery: [
-    { src: "photos/g1.jpg", caption: "这一张先放这里，以后看到还能想起当时在笑什么。" },
-    { src: "photos/g2.jpg", caption: "不是每一天都完美，但和宝宝有关的瞬间都值得留下。" },
-    { src: "photos/g3.jpg", caption: "" }
-    // { src: "photos/xx.jpg", caption: "旁白文字" },
+    { src: "photos/g1.jpg", caption: "这一张先放这里，以后看到还能想起当时在笑什么。", place: "杭州" },
+    { src: "photos/g2.jpg", caption: "不是每一天都完美，但和宝宝有关的瞬间都值得留下。", place: "杭州" },
+    { src: "photos/g3.jpg", caption: "", place: "" }
+    // { src: "photos/xx.jpg", caption: "旁白文字", place: "城市名" },
   ],
 
   /* ---------- 4. 她的摄影作品专区 ---------- */

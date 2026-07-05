@@ -140,10 +140,16 @@ body{
 .proj-btn{ display:block; margin:0 auto 1rem; padding:.5rem 1.6rem; cursor:pointer; font-family:inherit;
   background:transparent; color:var(--green); border:1px solid var(--green); border-radius:30px; letter-spacing:2px;
   box-shadow:0 0 18px var(--glow-g); }
-.gallery{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; max-width:840px; margin:0 auto; }
+.gallery{ max-width:840px; margin:0 auto; }
+.gallery-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
 .gallery figure{ margin:0; cursor:pointer; overflow:hidden; border-radius:14px; box-shadow:0 6px 22px rgba(0,0,0,.4); }
 .gallery img{ width:100%; aspect-ratio:1/1; object-fit:cover; display:block; transition:transform .4s; }
 .gallery figure:hover img{ transform:scale(1.07); }
+.gallery-group{ margin-bottom:2.4rem; scroll-margin-top:5rem; }
+.gg-title{ font-size:1.1rem; color:var(--purple); margin:0 0 1rem; display:flex; align-items:center; gap:.6rem; }
+.gg-count{ font-size:.78rem; color:var(--green-d); background:rgba(79,214,166,.12); padding:.1em .7em; border-radius:99px; }
+.gallery-group.flash{ animation:ggFlash 1.6s ease; }
+@keyframes ggFlash{ 0%,100%{ background:transparent; } 25%{ background:rgba(183,156,255,.14); } }
 
 /* ===== 信 ===== */
 .letter{ max-width:580px; margin:0 auto; background:rgba(21,18,42,.55); border:1px solid var(--line);

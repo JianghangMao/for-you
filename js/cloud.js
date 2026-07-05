@@ -16,22 +16,24 @@ const Cloud = (() => {
     if (!ready) return [];
     const { data, error } = await client.from("photos").select("*").eq("album", album).order("id");
     if (error){ console.warn("[cloud] 读取失败：", error.message); return []; }
-    return (data || []).map(r => ({ id:r.id, path:r.path, caption:r.caption || "", src:pub(r.path), _src:"cloud" }));
+    return (data || []).map(r => ({ id:r.id, path:r.path, caption:r.caption || "", place:r.place || "", src:pub(r.path), _src:"cloud" }));
   }
-  async function upload(album, blob, caption = ""){
+  async function upload(album, blob, caption = "", place = ""){
     const path = `${album}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.jpg`;
     const up = await client.storage.from(bucket).upload(path, blob, { contentType:"image/jpeg" });
     if (up.error) throw up.error;
-    const ins = await client.from("photos").insert({ album, path, caption });
+    const ins = await client.from("photos").insert({ album, path, caption, place });
     if (ins.error) throw ins.error;
   }
   async function del(id, path){
     if (path) await client.storage.from(bucket).remove([path]);
     await client.from("photos").delete().eq("id", id);
   }
-  async function updateCaption(id, caption){
-    await client.from("photos").update({ caption }).eq("id", id);
+  async function updateMeta(id, caption, place){
+    const patch = { caption };
+    if (place !== undefined) patch.place = place;
+    await client.from("photos").update(patch).eq("id", id);
   }
 
-  return { enabled: ready, list, upload, del, updateCaption };
+  return { enabled: ready, list, upload, del, updateMeta, updateCaption: updateMeta };
 })();
