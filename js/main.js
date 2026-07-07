@@ -55,7 +55,12 @@ function boot(){
   renderTimeline();
   renderGallery("gallery");
   renderGallery("herGallery");
-  $("letter").innerHTML = DATA.letter.map(p => `<p>${p}</p>`).join("");
+  $("letter").innerHTML = DATA.letter.map(b => {
+    if (b.type === "quote") return `<blockquote class="letter-quote">${b.text}</blockquote>`;
+    if (b.type === "sign" || b.type === "date") return `<p class="letter-sign">${b.text}</p>`;
+    if (b.type === "greet") return `<p class="letter-greet">${b.text}</p>`;
+    return `<p class="letter-p">${b.text}</p>`;
+  }).join("");
   $("lyrics").innerHTML = DATA.lyrics.map(p => `<p>${p}</p>`).join("");
   $("sleep").innerHTML  = DATA.sleepText.map(p => `<p>${p}</p>`).join("");
   $("secretText").textContent = DATA.secret;
