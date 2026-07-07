@@ -118,7 +118,7 @@ const DATA = {
      repeat 是否每年重复："yearly"（生日/纪念日用）或 ""（一次性）。 */
   days: [
     { label: "宝宝生日", date: "2026-07-10", repeat: "yearly", emoji: "🎂" },
-    { label: "我们在一起", date: "2026-03-28", repeat: "yearly", emoji: "💕" },
+    { label: "我们在一起", date: "2023-03-28", repeat: "yearly", emoji: "💕" },
     { label: "下次见面", date: "2026-07-08", repeat: "", emoji: "✈️" }
     // { label: "自定义", date: "2026-xx-xx", repeat: "", emoji: "✨" },
   ],
