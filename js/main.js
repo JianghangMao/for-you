@@ -407,6 +407,16 @@ function renderDays(){
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   $("daysGrid").innerHTML = DATA.days.map(d => {
     const base = new Date(d.date + "T00:00:00");
+    if (d.mode === "elapsed"){
+      const diff = Math.floor((today - base) / 86400000);
+      return `
+      <div class="day-card">
+        <div class="day-emoji">${d.emoji || "📅"}</div>
+        <div class="day-label">${d.label}</div>
+        <div class="day-num">${diff}</div>
+        <div class="day-unit">天啦</div>
+      </div>`;
+    }
     let target = new Date(today.getFullYear(), base.getMonth(), base.getDate());
     if (target < today && d.repeat === "yearly") target.setFullYear(now.getFullYear() + 1);
     if (target < today && d.repeat !== "yearly") target = base;
