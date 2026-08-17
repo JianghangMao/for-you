@@ -44,15 +44,15 @@ body{
 /* 流星：偶尔划过夜空 */
 .shooting-star{ position:absolute; width:130px; height:2px; border-radius:99px; opacity:0; pointer-events:none;
   background:linear-gradient(90deg, rgba(255,255,255,.9), rgba(183,156,255,.55) 45%, transparent);
-  transform:rotate(-28deg); }
+  transform:rotate(30deg); }
 .ss1{ top:10%; left:-12%; animation:shoot 11s ease-in 3s infinite; }
 .ss2{ top:36%; left:-16%; animation:shoot 14s ease-in 7s infinite; }
 .ss3{ top:62%; left:-20%; animation:shoot 17s ease-in 11s infinite; }
 @keyframes shoot{
-  0%{ opacity:0; transform:translate3d(0,0,0) rotate(-28deg); }
+  0%{ opacity:0; transform:translate3d(0,0,0) rotate(30deg); }
   4%{ opacity:1; }
-  16%{ opacity:0; transform:translate3d(52vw,30vh,0) rotate(-28deg); }
-  100%{ opacity:0; transform:translate3d(52vw,30vh,0) rotate(-28deg); }
+  16%{ opacity:0; transform:translate3d(52vw,30vh,0) rotate(30deg); }
+  100%{ opacity:0; transform:translate3d(52vw,30vh,0) rotate(30deg); }
 }
 
 /* ===== 密码门 ===== */
