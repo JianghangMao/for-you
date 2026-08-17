@@ -162,8 +162,12 @@
       <button class="pl-btn" id="plNext" title="下一首">⏭</button>
       <span class="pl-title" id="plTitle">选择音乐 ♪</span>
       <button class="pl-btn" id="plList" title="歌单">☰</button>
+      <button class="pl-btn" id="plVol" title="音量">🔊</button>
     </div>
     <div class="player-list" id="playerList"></div>
+    <div class="vol-panel hidden" id="volPanel">
+      <input type="range" id="volRange" min="0" max="1" step="0.05" value="1">
+    </div>
   </div>
   <audio id="audio"></audio>
 

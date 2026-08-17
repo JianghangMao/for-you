@@ -315,6 +315,10 @@ body.music-on .pl-eq i:nth-child(4){ animation-delay:.45s; }
 .player-list button{ display:block; width:100%; text-align:left; padding:.5rem .8rem; cursor:pointer;
   background:transparent; color:var(--ink); border:none; font-family:inherit; border-radius:8px; font-size:.9rem; }
 .player-list button:hover,.player-list button.playing{ background:rgba(132,232,192,.16); color:var(--green); }
+/* 音量面板 */
+.vol-panel{ position:absolute; right:0; bottom:52px; background:rgba(21,18,42,.95); border:1px solid var(--line);
+  border-radius:12px; padding:.7rem .9rem; display:flex; align-items:center; }
+#volRange{ width:130px; accent-color:var(--green); cursor:pointer; }
 
 /* ===== 大图 / 投影 ===== */
 .lightbox{ position:fixed; inset:0; z-index:60; background:rgba(6,5,14,.97);

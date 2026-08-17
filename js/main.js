@@ -497,13 +497,39 @@ $("plPlay").addEventListener("click", () => {
 });
 $("plPrev").addEventListener("click", () => playTrack((curTrack<=0?CONFIG.music.length:curTrack)-1));
 $("plNext").addEventListener("click", () => playTrack((curTrack+1)%CONFIG.music.length));
-$("plList").addEventListener("click", () => $("playerList").classList.toggle("show"));
+$("plList").addEventListener("click", () => { $("volPanel").classList.add("hidden"); $("playerList").classList.toggle("show"); });
 $("playerList").querySelectorAll("button").forEach(b =>
   b.addEventListener("click", () => { playTrack(+b.dataset.i); $("playerList").classList.remove("show"); }));
 audio.addEventListener("ended", () => playTrack((curTrack+1)%CONFIG.music.length));
 /* 播放器律动条：播放时跳动，暂停时静止 */
 audio.addEventListener("play", () => document.body.classList.add("music-on"));
 audio.addEventListener("pause", () => document.body.classList.remove("music-on"));
+
+/* ---------- 音量控制（记住上次音量） ---------- */
+const VOL_KEY = "player_vol";
+(function initVol(){
+  const saved = parseFloat(localStorage.getItem(VOL_KEY));
+  if (!isNaN(saved)) audio.volume = Math.min(1, Math.max(0, saved));
+  $("volRange").value = String(audio.volume);
+  refreshVolIcon();
+  $("plVol").addEventListener("click", e => {
+    e.stopPropagation();
+    $("playerList").classList.remove("show");
+    $("volPanel").classList.toggle("hidden");
+  });
+  $("volRange").addEventListener("input", e => {
+    audio.volume = parseFloat(e.target.value);
+    localStorage.setItem(VOL_KEY, String(audio.volume));
+    refreshVolIcon();
+  });
+  document.addEventListener("click", e => {
+    if (!$("volPanel").classList.contains("hidden") && !e.target.closest("#volPanel") && !e.target.closest("#plVol"))
+      $("volPanel").classList.add("hidden");
+  });
+})();
+function refreshVolIcon(){
+  $("plVol").textContent = audio.volume === 0 ? "🔇" : audio.volume < 0.5 ? "🔉" : "🔊";
+}
 
 /* ---------- 悄悄话彩蛋（连点星星 3 下） ---------- */
 let eggCount = 0, eggTimer = null;
