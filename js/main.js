@@ -278,8 +278,7 @@ async function renderGallery(elId){
     html += `<div class="gallery-grid">` + list.map((g,i) => figureHTML(g, i)).join("") + `</div>`;
   }
   if (editMode)
-    html += `<div class="gallery-grid"><label class="add-tile"><span>＋</span>添加照片
-      <input type="file" accept="image/*" multiple hidden></label></div>`;
+    html += `<div class="gallery-grid"><button class="add-tile" type="button" data-add="${elId}"><span>＋</span>添加照片</button></div>`;
   $(elId).innerHTML = html;
 
   $(elId).querySelectorAll("figure").forEach(f => {
@@ -296,8 +295,13 @@ async function renderGallery(elId){
       else await Store.del(+b.dataset.id);
       toast("已删除"); renderGallery(elId);
     }));
-    const input = $(elId).querySelector(".add-tile input");
-    if (input) input.addEventListener("change", e => handleUpload(elId, e.target.files));
+    $(elId).querySelectorAll(".add-tile").forEach(b => b.addEventListener("click", () => {
+      const inp = document.createElement("input");
+      inp.type = "file"; inp.accept = "image/*"; inp.multiple = true; inp.style.display = "none";
+      document.body.appendChild(inp);
+      inp.addEventListener("change", e => { handleUpload(elId, e.target.files); document.body.removeChild(inp); });
+      inp.click();
+    }));
   }
 }
 
@@ -321,7 +325,7 @@ async function doUpload(elId, files, place){
         const src = await fileToDataURL(file);
         if (src) await Store.add({ album: ALBUMS[elId].album, src, caption:"", place, ts: Date.now() });
       }
-    } catch (err){ console.warn(err); toast("上传失败：" + friendlyErr(err)); return; }
+    } catch (err){ console.warn(err); toast("上传失败：" + friendlyErr(err), 6000); return; }
   }
   toast(Cloud.enabled ? "已上传到云端" : "已添加到本地");
   renderGallery(elId);
@@ -379,6 +383,7 @@ async function uploadMany(files){
   $("upFile").value = "";
   renderGallery("gallery");   // 刷新相册缓存，进相册就是最新的
 }
+$("upFileBtn").addEventListener("click", () => $("upFile").click());
 $("upFile").addEventListener("change", e => uploadMany(e.target.files));
 $("upLink").addEventListener("click", () => { location.hash = "upload"; });
 
@@ -494,11 +499,11 @@ $("dupeBtn").addEventListener("click", deleteDupes);
 
 /* ---------- 轻提示 ---------- */
 let toastT = null;
-function toast(msg){
+function toast(msg, ms){
   $("toast").textContent = msg;
   $("toast").classList.remove("hidden");
   clearTimeout(toastT);
-  toastT = setTimeout(() => $("toast").classList.add("hidden"), 2200);
+  toastT = setTimeout(() => $("toast").classList.add("hidden"), ms || 2200);
 }
 
 /* ---------- 大图 / 投影 ---------- */

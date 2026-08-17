@@ -213,7 +213,7 @@ body{
 .up-btn{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem;
   margin:0 auto; width:100%; max-width:360px; aspect-ratio:3/1; border-radius:20px; cursor:pointer;
   background:rgba(132,232,192,.08); border:2px dashed var(--green); color:var(--green);
-  transition:background .3s; }
+  font-family:inherit; transition:background .3s; }
 .up-btn:hover{ background:rgba(132,232,192,.16); }
 .up-btn-icon{ font-size:2.2rem; line-height:1; }
 .up-btn-text{ font-size:1.05rem; letter-spacing:2px; }
@@ -367,7 +367,7 @@ body.editing .gallery figure{ outline:1px dashed rgba(183,156,255,.4); }
 /* 添加照片格子 */
 .add-tile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.3rem;
   aspect-ratio:1/1; border-radius:14px; cursor:pointer; color:var(--green); font-size:.95rem;
-  background:rgba(132,232,192,.07); border:1.5px dashed var(--green); transition:background .3s; }
+  background:rgba(132,232,192,.07); border:1.5px dashed var(--green); font-family:inherit; transition:background .3s; }
 .add-tile:hover{ background:rgba(132,232,192,.16); }
 .add-tile span{ font-size:1.8rem; line-height:1; }
 /* 删除按钮 */

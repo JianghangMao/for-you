@@ -88,11 +88,11 @@
       <div class="up-wrap">
         <div class="up-city-title">这些照片拍在哪儿？</div>
         <div class="up-city" id="upCity"></div>
-        <label class="up-btn">
-          <input type="file" id="upFile" accept="image/*" multiple hidden>
+        <button class="up-btn" id="upFileBtn" type="button">
           <span class="up-btn-icon">＋</span>
           <span class="up-btn-text">从相册选择照片</span>
-        </label>
+        </button>
+        <input type="file" id="upFile" accept="image/*" multiple style="display:none">
         <div class="up-progress hidden" id="upProgress">
           <div class="up-bar"><div class="up-bar-in" id="upBar"></div></div>
           <p id="upStatus"></p>
