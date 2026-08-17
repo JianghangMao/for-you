@@ -5,6 +5,13 @@
 const $ = (id) => document.getElementById(id);
 
 /* ---------- 通用输入弹层（兼容 iOS Safari：不用 prompt） ---------- */
+/* 把上传/网络错误转成好懂的中文提示 */
+function friendlyErr(err){
+  const m = (err && err.message) || "";
+  if (err instanceof TypeError || /fetch|network|NetworkError|ECONN|Failed to fetch/i.test(m))
+    return "网络连接失败（照片存在境外服务器，建议连 WiFi 或挂代理后重试）";
+  return m || "未知错误，请检查网络";
+}
 function askInput(title, placeholder, defaultValue, callback, isPassword){
   $("modalTitle").textContent = title;
   $("modalInput").placeholder = placeholder || "";
@@ -314,7 +321,7 @@ async function doUpload(elId, files, place){
         const src = await fileToDataURL(file);
         if (src) await Store.add({ album: ALBUMS[elId].album, src, caption:"", place, ts: Date.now() });
       }
-    } catch (err){ console.warn(err); toast("上传失败：" + (err.message || "请检查网络/Supabase 配置")); return; }
+    } catch (err){ console.warn(err); toast("上传失败：" + friendlyErr(err)); return; }
   }
   toast(Cloud.enabled ? "已上传到云端" : "已添加到本地");
   renderGallery(elId);
@@ -361,7 +368,7 @@ async function uploadMany(files){
       thumb.src = URL.createObjectURL(list[i]);
       thumb.className = "up-thumb";
       $("upThumbs").appendChild(thumb);
-    } catch (err){ fail++; if (!failMsg) failMsg = err.message; console.warn(err); }
+    } catch (err){ fail++; if (!failMsg) failMsg = friendlyErr(err); console.warn(err); }
     $("upBar").style.width = Math.round((i + 1) / list.length * 100) + "%";
   }
   $("upStatus").textContent = fail
