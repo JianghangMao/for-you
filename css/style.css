@@ -264,6 +264,7 @@ body{
   opacity:0; transform:translateY(8px); transition:opacity .3s, transform .3s; pointer-events:none; }
 .gallery figure:hover .gal-cap{ opacity:1; transform:none; }
 .gal-cap:empty{ display:none; }
+.gallery-tip{ text-align:center; color:#ef9fb8; font-size:.9rem; margin:0 0 1rem; }
 .gallery-group{ margin-bottom:2.4rem; scroll-margin-top:5rem; }
 .gg-title{ font-size:1.1rem; color:var(--purple); margin:0 0 1rem; display:flex; align-items:center; gap:.6rem; }
 .gg-count{ font-size:.78rem; color:var(--green-d); background:rgba(79,214,166,.12); padding:.1em .7em; border-radius:99px; }

@@ -210,8 +210,12 @@ function storyFor(place){
 
 async function renderGallery(elId){
   const meta = ALBUMS[elId];
-  const cloud = await Cloud.list(meta.album);
-  const local = await Store.byAlbum(meta.album);
+  // 云端/本地加载失败也要容错：不中断渲染，只提示
+  let cloud = [], local = [], cloudErr = false;
+  try { cloud = await Cloud.list(meta.album); }
+  catch (err){ cloudErr = true; console.warn("[gallery] 云端照片加载失败：", err); }
+  try { local = await Store.byAlbum(meta.album); }
+  catch (err){ console.warn("[gallery] 本地照片读取失败：", err); }
   const list = [
     ...meta.base(),
     ...cloud.map(c => ({ src:c.src, caption:c.caption, place:c.place||"", _id:c.id, _src:"cloud", _path:c.path })),
@@ -227,6 +231,7 @@ async function renderGallery(elId){
     </figure>`;
 
   let html = "";
+  if (cloudErr) html += `<p class="gallery-tip">☁ 云端照片没加载出来（网络不稳？），先看看这些</p>`;
   if (elId === "gallery" && list.length){
     // 按地点分组：有 place 的按 place 分，没 place 的归"日常"放最后
     const groups = {};
@@ -474,7 +479,7 @@ function initMap(){
       });
     })
     .catch(() => { chart.hideLoading();
-      $("map").innerHTML = "<p style='text-align:center;color:#a59ec8;padding-top:30%'>地图需要联网加载，请检查网络后刷新</p>"; });
+      $("map").innerHTML = "<p style='text-align:center;color:#ef9fb8;padding-top:30%'>地图加载失败（需要联网），请检查网络后回到主页再进一次</p>"; });
 }
 
 /* ---------- 音乐播放器 ---------- */
