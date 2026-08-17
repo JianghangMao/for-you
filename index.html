@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>宝宝生日快乐</title>
+  <title>Lovesite</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
@@ -49,7 +49,7 @@
         <nav class="portals" id="cards"><!-- 入口由 JS 生成 --></nav>
         <footer class="home-foot">
           <span class="star-egg" id="starEgg" title="?">✦</span>
-          <p>from 狗狗</p>
+          <p>Made By 狗狗</p>
         </footer>
       </div>
     </section>
@@ -62,8 +62,12 @@
 
     <!-- ===== 地图（省份） ===== -->
     <section class="view" id="view-map">
-      <h2 class="view-h">我们去过的地方</h2>
-      <p class="view-tip">发光的是我们已经走过、或正在生活的地方</p>
+      <h2 class="view-h">我们一起去过的地方</h2>
+      <div class="map-legend">
+        <span class="lg-item"><i class="lg-dot lg-home"></i>狗狗在的地方</span>
+        <span class="lg-item"><i class="lg-dot lg-her"></i>宝宝在的地方</span>
+        <span class="lg-item"><i class="lg-dot lg-visit"></i>一起玩过的地方</span>
+      </div>
       <div id="map"></div>
     </section>
 
@@ -85,7 +89,7 @@
     <!-- ===== 她的摄影 ===== -->
     <section class="view" id="view-her">
       <h2 class="view-h">你眼里的世界</h2>
-      <p class="view-tip">宝宝拍到的世界</p>
+      <p class="view-tip">大摄影师宝宝的作品</p>
       <div class="gallery" id="herGallery"></div>
     </section>
 
@@ -105,14 +109,14 @@
     <!-- ===== 重要日子倒数 ===== -->
     <section class="view" id="view-days">
       <h2 class="view-h">重要日子</h2>
-      <p class="view-tip">见面、生日、纪念日，都慢慢数着</p>
+      <p class="view-tip">好多好多重要的日子</p>
       <div class="days-grid" id="daysGrid"></div>
     </section>
 
     <!-- ===== 想一起做的事 ===== -->
     <section class="view" id="view-wish">
       <h2 class="view-h">饱饱和狗狗要做的n件新鲜事</h2>
-      <p class="view-tip">不急，一件一件来</p>
+      <p class="view-tip">肯定能在几十年里面做完哒</p>
       <div class="wish-progress"><span id="wishProgress"></span></div>
       <div class="wishlist" id="wishlist"></div>
     </section>

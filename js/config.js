@@ -38,7 +38,10 @@ const CONFIG = {
 
   /* 首页副标题 */
   coverTitle: "生日快乐",
-  coverSubtitle: "给饱饱的一小片宇宙",
+  coverSubtitle: "狗狗和宝宝的恋爱纪念网站！",
+
+  /* 密码门标题 */
+  gateTitle: "饱饱大人严肃登录",
 
   /* 背景音乐歌单
      —— 以后想加歌（比如华晨宇），照着下面复制一行就行。

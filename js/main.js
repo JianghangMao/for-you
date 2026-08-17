@@ -11,14 +11,14 @@ const SECTIONS = [
   { id:"gallery",  icon:"📷", title:"我们的相册", sub:"一些真实的瞬间",     size:"wide" },
   { id:"timeline", icon:"🕰", title:"我们的故事", sub:"从同桌到异地",       size:"" },
   { id:"her",      icon:"🌷", title:"你眼里的世界", sub:"宝宝拍到的生活",    size:"" },
-  { id:"letter",   icon:"✉️", title:"写给你的信", sub:"狗狗认真写的",       size:"wide" },
+  { id:"letter",   icon:"📮", title:"邮箱嘎嘎",  sub:"狗狗认真写的",       size:"wide" },
   { id:"sleep",    icon:"🌙", title:"晚安",       sub:"宿舍吵也慢慢睡",      size:"wide" },
   { id:"days",     icon:"📅", title:"重要日子",   sub:"见面和纪念日",        size:"" },
   { id:"wish",     icon:"✨", title:"想做的事",   sub:"不急，一件件来",      size:"" },
 ];
 
 /* ---------- 密码门 ---------- */
-$("gateTitle").textContent = `给 ${CONFIG.herName} · ${CONFIG.coverTitle}`;
+$("gateTitle").textContent = CONFIG.gateTitle || `给 ${CONFIG.herName} · ${CONFIG.coverTitle}`;
 function tryEnter(){
   if ($("gateInput").value.trim() === String(CONFIG.password)){
     $("gate").classList.add("hidden");
@@ -26,7 +26,7 @@ function tryEnter(){
     $("player").classList.remove("hidden");
     boot();
   } else {
-    $("gateErr").textContent = "密码不对，饱饱再想想";
+    $("gateErr").textContent = "凑饱饱连纪念日都忘记啦";
     $("gateInput").value = "";
   }
 }
@@ -36,7 +36,7 @@ $("gateInput").addEventListener("keydown", e => { if (e.key === "Enter") tryEnte
 /* ---------- 启动渲染 ---------- */
 function boot(){
   // 主页文字
-  $("heroGreet").textContent = `${CONFIG.herName}，${CONFIG.coverSubtitle}`;
+  $("heroGreet").textContent = CONFIG.coverSubtitle;
   $("distLine").innerHTML = `${CONFIG.cityA.name} <b>${CONFIG.distanceKm}km</b> ${CONFIG.cityB.name}`;
   updateTimer(); setInterval(updateTimer, 1000);
   updateBday();
@@ -143,6 +143,13 @@ const ALBUMS = {
 };
 const albumCache = {};   // 合并后的列表，供大图/投影用
 
+/* 找某个地点分组对应的"感受"文字（来自 provinces 的 story 字段） */
+function storyFor(place){
+  if (!place) return "";
+  const p = DATA.provinces.find(pr => (pr.cities || []).some(c => c.name === place));
+  return (p && p.story) ? p.story : "";
+}
+
 async function renderGallery(elId){
   const meta = ALBUMS[elId];
   const cloud = await Cloud.list(meta.album);
@@ -174,6 +181,8 @@ async function renderGallery(elId){
       const items = groups[name];
       html += `<div class="gallery-group" id="gg-${encodeURIComponent(name)}">`;
       html += `<h3 class="gg-title">${name}<span class="gg-count">${items.length}</span></h3>`;
+      const story = storyFor(name);
+      if (story) html += `<p class="gg-story">${story}</p>`;
       html += `<div class="gallery-grid">`;
       items.forEach(it => { html += figureHTML(it.g, it.i); });
       html += `</div></div>`;
@@ -302,6 +311,12 @@ $("projBtn").addEventListener("click", () => openLightbox(albumCache["gallery"] 
 
 /* ---------- 省份地图（ECharts，懒加载） ---------- */
 let chart = null;
+/* 地图三色：home=狗狗在的地方(紫) / her=宝宝在的地方(绿) / visited=一起玩过(暖金发光) */
+const MAP_STYLE = {
+  home:    { areaColor:"#b79cff", borderColor:"#d6c9ff", shadowColor:"#b79cff", shadowBlur:10, hi:"#c9b4ff" },
+  her:     { areaColor:"#4fd6a6", borderColor:"#84e8c0", shadowColor:"#4fd6a6", shadowBlur:10, hi:"#84e8c0" },
+  visited: { areaColor:"#ffc46b", borderColor:"#ffd9a0", shadowColor:"#ffc46b", shadowBlur:18, hi:"#ffd9a0" },
+};
 function coreName(n){ return n.replace(/(省|市|自治区|特别行政区|维吾尔|壮族|回族|自治州)/g, ""); }
 function initMap(){
   if (chart) return;
@@ -327,9 +342,12 @@ function initMap(){
           itemStyle:{ areaColor:"#1a1535", borderColor:"rgba(183,156,255,.30)", borderWidth:.7 },
           emphasis:{ label:{ show:true, color:"#0b0a18", fontSize:11 },
             itemStyle:{ areaColor:"#b79cff" } },
-          data: visited.map(v => ({ name:v.full, value:1,
-            itemStyle:{ areaColor:"#4fd6a6", borderColor:"#84e8c0", shadowColor:"#84e8c0", shadowBlur:16 },
-            emphasis:{ itemStyle:{ areaColor:"#84e8c0" } } }))
+          data: visited.map(v => {
+            const st = MAP_STYLE[v.p.type] || MAP_STYLE.visited;
+            return { name:v.full, value:1,
+              itemStyle:{ areaColor:st.areaColor, borderColor:st.borderColor, shadowColor:st.shadowColor, shadowBlur:st.shadowBlur },
+              emphasis:{ itemStyle:{ areaColor:st.hi } } };
+          })
         }]
       });
       chart.on("click", pr => {
