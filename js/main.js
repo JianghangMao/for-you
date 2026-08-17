@@ -22,9 +22,24 @@ $("gateTitle").textContent = CONFIG.gateTitle || `给 ${CONFIG.herName} · ${CON
 function tryEnter(){
   if ($("gateInput").value.trim() === String(CONFIG.password)){
     $("gate").classList.add("hidden");
-    $("app").classList.remove("hidden");
-    $("player").classList.remove("hidden");
-    boot();
+    // 开场打字机动画：把副标题一个字一个字打出来，然后进入主页
+    const text = CONFIG.coverSubtitle;
+    $("introType").textContent = "";
+    $("intro").classList.remove("hidden");
+    let i = 0;
+    const timer = setInterval(() => {
+      i++;
+      $("introType").textContent = text.slice(0, i);
+      if (i >= text.length){
+        clearInterval(timer);
+        setTimeout(() => {
+          $("intro").classList.add("hidden");
+          $("app").classList.remove("hidden");
+          $("player").classList.remove("hidden");
+          boot();
+        }, 700);
+      }
+    }, 100);
   } else {
     $("gateErr").textContent = "凑饱饱连纪念日都忘记啦";
     $("gateInput").value = "";
