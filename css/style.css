@@ -224,6 +224,20 @@ body{
 .up-thumbs{ display:flex; flex-wrap:wrap; gap:6px; margin-top:1rem; justify-content:center; }
 .up-thumb{ width:56px; height:56px; object-fit:cover; border-radius:8px; }
 
+/* ===== 通用输入弹层（iOS 兼容） ===== */
+.modal-mask{ position:fixed; inset:0; z-index:90; background:rgba(6,5,14,.82);
+  display:flex; align-items:center; justify-content:center; padding:2rem; }
+.modal{ width:100%; max-width:320px; background:var(--bg2); border:1px solid var(--line);
+  border-radius:16px; padding:1.6rem 1.4rem; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,.5); }
+.modal-title{ color:var(--ink); font-size:1rem; margin-bottom:1.2rem; line-height:1.6; }
+.modal-input{ width:100%; padding:.7rem .9rem; background:rgba(11,10,24,.6); color:var(--ink);
+  border:1px solid var(--line); border-radius:10px; font-size:1rem; outline:none; text-align:center; font-family:inherit; }
+.modal-input:focus{ border-color:var(--green); }
+.modal-btns{ display:flex; gap:.8rem; margin-top:1.2rem; }
+.modal-btn{ flex:1; padding:.55rem 0; border-radius:30px; cursor:pointer; font-family:inherit; font-size:.95rem; }
+.modal-cancel{ background:transparent; color:var(--ink-dim); border:1px solid var(--line); }
+.modal-ok{ background:var(--grad); color:#0b0a18; border:none; font-weight:500; }
+
 /* ===== 时间线 ===== */
 .timeline{ width:100%; max-width:640px; margin:0 auto; position:relative; }
 .timeline::before{ content:""; position:absolute; left:18px; top:0; bottom:0; width:2px;

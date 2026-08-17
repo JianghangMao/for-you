@@ -4,6 +4,20 @@
    ========================================================= */
 const $ = (id) => document.getElementById(id);
 
+/* ---------- 通用输入弹层（兼容 iOS Safari：不用 prompt） ---------- */
+function askInput(title, placeholder, defaultValue, callback, isPassword){
+  $("modalTitle").textContent = title;
+  $("modalInput").placeholder = placeholder || "";
+  $("modalInput").value = defaultValue || "";
+  $("modalInput").type = isPassword ? "password" : "text";
+  $("modalMask").classList.remove("hidden");
+  let settled = false;
+  const done = v => { if (settled) return; settled = true; $("modalMask").classList.add("hidden"); callback(v); };
+  $("modalOk").onclick = () => done($("modalInput").value.trim());
+  $("modalCancel").onclick = () => done(null);
+  setTimeout(() => { try { $("modalInput").focus(); } catch(e){} }, 80);
+}
+
 /* ---------- 多主题切换 ----------
    主题的配色定义在 css/style.css 里（body.theme-xxx 覆盖变量）。
    选择会保存在浏览器本地，下次打开保持。 */
@@ -134,7 +148,9 @@ function route(){
   let h = location.hash.replace("#","") || "home";
   if (!VIEWS.includes(h)) h = "home";
   // 传照片页需要编辑密码才能进（本次会话记住）
-  if (h === "upload" && !ensureUpAuth()){ h = "home"; location.hash = "home"; }
+  if (h === "upload"){
+    ensureUpAuth(ok => { if (!ok && location.hash === "#upload") location.hash = "home"; });
+  }
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   $("view-" + h).classList.add("active");
   $("app").classList.toggle("in-sub", h !== "home");
@@ -280,22 +296,25 @@ async function renderGallery(elId){
 
 async function handleUpload(elId, files){
   if (!files || !files.length) return;
-  // gallery 相册上传时问一下拍在哪个城市（留空=日常分组）
-  let place = "";
   if (elId === "gallery"){
-    place = (prompt("这批照片拍在哪个城市？（留空归到\"日常\"分组）", "") || "").trim();
+    askInput("这批照片拍在哪个城市？（留空归到\"日常\"）", "如：北京", "", v => doUpload(elId, files, (v || "").trim()));
+  } else {
+    doUpload(elId, files, "");
   }
+}
+async function doUpload(elId, files, place){
   toast(`正在添加 ${files.length} 张…`);
   for (const file of files){
     try {
       if (Cloud.enabled){
         const blob = await fileToBlob(file);
-        if (blob) await Cloud.upload(ALBUMS[elId].album, blob, "", place);
+        if (!blob) throw new Error("照片格式无法转换（HEIC？请用 Safari 打开，或把 iPhone 相机格式设为\"兼容性最好\"）");
+        await Cloud.upload(ALBUMS[elId].album, blob, "", place);
       } else {
         const src = await fileToDataURL(file);
         if (src) await Store.add({ album: ALBUMS[elId].album, src, caption:"", place, ts: Date.now() });
       }
-    } catch (err){ console.warn(err); toast("上传失败：" + (err.message || "请检查 Supabase 配置")); return; }
+    } catch (err){ console.warn(err); toast("上传失败：" + (err.message || "请检查网络/Supabase 配置")); return; }
   }
   toast(Cloud.enabled ? "已上传到云端" : "已添加到本地");
   renderGallery(elId);
@@ -304,12 +323,12 @@ async function handleUpload(elId, files){
 /* ---------- 传照片页（手机友好：选城市 → 选照片 → 自动上传） ---------- */
 const UP_AUTH_KEY = "upload_auth_ok";
 const UP_PLACE_KEY = "upload_place";
-function ensureUpAuth(){
-  if (sessionStorage.getItem(UP_AUTH_KEY) === "1") return true;
-  const pw = prompt("请输入编辑密码：");
-  if (pw === null) return false;
-  if (pw === String(CONFIG.editPassword)){ sessionStorage.setItem(UP_AUTH_KEY, "1"); return true; }
-  toast("编辑密码不对"); return false;
+function ensureUpAuth(cb){
+  if (sessionStorage.getItem(UP_AUTH_KEY) === "1"){ cb(true); return; }
+  askInput("请输入编辑密码", "编辑密码", "", v => {
+    if (v !== null && v === String(CONFIG.editPassword)){ sessionStorage.setItem(UP_AUTH_KEY, "1"); cb(true); }
+    else { toast("编辑密码不对"); cb(false); }
+  }, true);
 }
 function renderUpCities(){
   const cities = ["日常"];
@@ -329,24 +348,24 @@ async function uploadMany(files){
   const list = [...files];
   $("upProgress").classList.remove("hidden");
   $("upThumbs").innerHTML = "";
-  let ok = 0, fail = 0;
+  let ok = 0, fail = 0, failMsg = "";
   for (let i = 0; i < list.length; i++){
     $("upStatus").textContent = `正在上传 ${i + 1}/${list.length}…`;
     $("upBar").style.width = Math.round(i / list.length * 100) + "%";
     try {
       const blob = await fileToBlob(list[i]);
-      if (!blob) throw new Error("图片处理失败");
+      if (!blob) throw new Error("照片格式无法转换（HEIC？请用 Safari 打开，或把 iPhone 相机格式设为\"兼容性最好\"）");
       await Cloud.upload("gallery", blob, "", place);
       ok++;
       const thumb = document.createElement("img");
       thumb.src = URL.createObjectURL(list[i]);
       thumb.className = "up-thumb";
       $("upThumbs").appendChild(thumb);
-    } catch (err){ fail++; console.warn(err); }
+    } catch (err){ fail++; if (!failMsg) failMsg = err.message; console.warn(err); }
     $("upBar").style.width = Math.round((i + 1) / list.length * 100) + "%";
   }
   $("upStatus").textContent = fail
-    ? `完成：成功 ${ok} 张，失败 ${fail} 张（失败的可重新选一次）`
+    ? `完成：成功 ${ok} 张，失败 ${fail} 张${failMsg ? "（" + failMsg + "）" : ""}`
     : `完成：已上传 ${ok} 张到「${place}」✅`;
   $("upBar").style.width = "100%";
   toast(`已上传 ${ok} 张`);
@@ -359,12 +378,16 @@ $("upLink").addEventListener("click", () => { location.hash = "upload"; });
 async function editItem(elId, i){
   const g = albumCache[elId][i];
   if (!g._id){ toast("内置照片的文字和地点请在 data.js 里改"); return; }
-  const cap = prompt("给这张照片写一句旁白：", g.caption || "");
-  if (cap === null) return;
-  let place = g.place || "";
-  if (elId === "gallery"){
-    place = (prompt("拍在哪个城市？（留空归到\"日常\"分组）", g.place || "") || "").trim();
-  }
+  askInput("给这张照片写一句旁白", "旁白", g.caption || "", cap => {
+    if (cap === null) return;
+    if (elId === "gallery"){
+      askInput("拍在哪个城市？（留空归到\"日常\"）", "如：北京", g.place || "", place => saveEdit(elId, g, cap, (place || "").trim()));
+    } else {
+      saveEdit(elId, g, cap, g.place || "");
+    }
+  });
+}
+async function saveEdit(elId, g, cap, place){
   if (g._src === "cloud"){
     await Cloud.updateMeta(g._id, cap, place);
   } else {
@@ -387,10 +410,11 @@ function setEdit(on){
 }
 $("editBtn").addEventListener("click", () => {
   if (editMode){ setEdit(false); return; }
-  const pw = prompt("请输入编辑密码：");
-  if (pw === null) return;
-  if (pw === String(CONFIG.editPassword)) setEdit(true);
-  else toast("编辑密码不对");
+  askInput("请输入编辑密码", "编辑密码", "", v => {
+    if (v === null) return;
+    if (v === String(CONFIG.editPassword)) setEdit(true);
+    else toast("编辑密码不对");
+  }, true);
 });
 
 /* ---------- 一键删除重复照片 ----------

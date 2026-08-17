@@ -195,6 +195,18 @@
   <!-- ===== 主题选择面板（主页点"换主题"弹出） ===== -->
   <div class="theme-panel hidden" id="themePanel"></div>
 
+  <!-- ===== 通用输入弹层（兼容 iOS Safari：替代 prompt） ===== -->
+  <div class="modal-mask hidden" id="modalMask">
+    <div class="modal">
+      <p class="modal-title" id="modalTitle"></p>
+      <input class="modal-input" id="modalInput" type="text" autocomplete="off">
+      <div class="modal-btns">
+        <button class="modal-btn modal-cancel" id="modalCancel">取消</button>
+        <button class="modal-btn modal-ok" id="modalOk">确定</button>
+      </div>
+    </div>
+  </div>
+
   <script src="assets/vendor/echarts.min.js"></script>
   <script src="assets/vendor/supabase-js.js"></script>
   <script src="js/config.js"></script>
