@@ -222,6 +222,7 @@ async function renderGallery(elId){
   const figureHTML = (g, i) => `
     <figure data-i="${i}">
       <img src="${g.src}" alt="" onerror="this.src='assets/placeholder.svg'">
+      <figcaption class="gal-cap">${g.caption || ""}</figcaption>
       ${editMode && g._id ? `<button class="del" data-id="${g._id}" data-src="${g._src}" data-path="${g._path||""}">✕</button>` : ""}
     </figure>`;
 
@@ -500,6 +501,9 @@ $("plList").addEventListener("click", () => $("playerList").classList.toggle("sh
 $("playerList").querySelectorAll("button").forEach(b =>
   b.addEventListener("click", () => { playTrack(+b.dataset.i); $("playerList").classList.remove("show"); }));
 audio.addEventListener("ended", () => playTrack((curTrack+1)%CONFIG.music.length));
+/* 播放器律动条：播放时跳动，暂停时静止 */
+audio.addEventListener("play", () => document.body.classList.add("music-on"));
+audio.addEventListener("pause", () => document.body.classList.remove("music-on"));
 
 /* ---------- 悄悄话彩蛋（连点星星 3 下） ---------- */
 let eggCount = 0, eggTimer = null;
