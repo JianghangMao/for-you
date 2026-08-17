@@ -381,6 +381,7 @@ function setEdit(on){
   editMode = on;
   document.body.classList.toggle("editing", on);
   $("editBtn").classList.toggle("on", on);
+  $("dupeBtn").classList.toggle("hidden", !on);
   renderGallery("gallery"); renderGallery("herGallery");
   toast(on ? (Cloud.enabled ? "编辑模式 · 云端已连接 ☁" : "编辑模式 · 本地存储") : "已退出编辑模式");
 }
@@ -391,6 +392,74 @@ $("editBtn").addEventListener("click", () => {
   if (pw === String(CONFIG.editPassword)) setEdit(true);
   else toast("编辑密码不对");
 });
+
+/* ---------- 一键删除重复照片 ----------
+   只删除【字节完全相同】的照片（SHA-256 指纹一致的才算重复），
+   每组保留 1 张；"看起来像"但内容不同的照片绝不误删。 */
+async function findDuplicateGroups(photos, onProgress){
+  const groups = new Map();
+  let done = 0;
+  const queue = [...photos];
+  const CONC = 6;   // 同时下载 6 张，避免太慢
+  async function worker(){
+    while (queue.length){
+      const p = queue.shift();
+      try {
+        const resp = await fetch(p.src);
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        const buf = await resp.arrayBuffer();
+        const digest = await crypto.subtle.digest("SHA-256", buf);
+        const h = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+        const arr = groups.get(h) || [];
+        arr.push(p);
+        groups.set(h, arr);
+      } catch (err){
+        console.warn("[dupe] 跳过无法读取的照片", p.id, err.message);
+      }
+      done++;
+      if (onProgress) onProgress(done, photos.length);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(CONC, queue.length) }, worker));
+  return [...groups.values()].filter(g => g.length > 1);
+}
+async function deleteDupes(){
+  if (!Cloud.enabled){ toast("云端未连接，无法扫描"); return; }
+  if (!window.crypto || !window.crypto.subtle){ toast("当前浏览器不支持安全比对"); return; }
+  let photos = [];
+  try { photos = await Cloud.list("gallery"); }
+  catch (err){ toast("读取云端照片失败"); return; }
+  if (!photos.length){ toast("云端相册还没有照片"); return; }
+  $("dupeTip").classList.remove("hidden");
+  $("dupeTip").textContent = "正在下载照片并比对（完全相同的才会被标记）…";
+  const groups = await findDuplicateGroups(photos, (d, t) => {
+    $("dupeTip").textContent = `正在比对 ${d}/${t}…`;
+  });
+  if (!groups.length){
+    $("dupeTip").textContent = "✅ 没有发现完全相同的重复照片";
+    setTimeout(() => $("dupeTip").classList.add("hidden"), 4000);
+    return;
+  }
+  const removeCount = groups.reduce((s, g) => s + g.length - 1, 0);
+  if (!confirm(`找到 ${groups.length} 组完全相同的照片，将删除其中 ${removeCount} 张（每组保留 1 张）。确定删除？`)){
+    $("dupeTip").textContent = "已取消";
+    setTimeout(() => $("dupeTip").classList.add("hidden"), 2500);
+    return;
+  }
+  let ok = 0;
+  for (const g of groups){
+    const [, ...rest] = g;
+    for (const p of rest){
+      try { await Cloud.del(p.id, p.path); ok++; }
+      catch (err){ console.warn("[dupe] 删除失败", p.id, err.message); }
+    }
+  }
+  $("dupeTip").textContent = `已删除 ${ok} 张重复照片`;
+  setTimeout(() => $("dupeTip").classList.add("hidden"), 4000);
+  toast(`已删除 ${ok} 张重复照片`);
+  renderGallery("gallery");
+}
+$("dupeBtn").addEventListener("click", deleteDupes);
 
 /* ---------- 轻提示 ---------- */
 let toastT = null;
