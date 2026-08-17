@@ -118,13 +118,14 @@ const DATA = {
   secret: "偷偷说一句：狗狗还是很喜欢被宝宝叫狗狗，也很喜欢叫你饱饱。",
 
   /* ---------- 9. 重要日子倒数 ----------
-     type 固定写 "countdown"。
+     type 固定写 "countdown"（已不用）。
      date 日期，格式 "2026-07-10"。
-     repeat 是否每年重复："yearly"（生日/纪念日用）或 ""（一次性）。 */
+     repeat 是否每年重复："yearly"（生日/纪念日用）或 ""（一次性）。
+     也可以不写 date，改用 text：卡片会直接显示这段文字（适合"下次见面"这种状态说明）。 */
   days: [
     { label: "宝宝生日", date: "2026-07-10", repeat: "yearly", emoji: "🎂" },
     { label: "我们在一起", date: "2023-03-28", repeat: "yearly", emoji: "💕", mode: "elapsed" },
-    { label: "下次见面", date: "2026-07-08", repeat: "", emoji: "✈️" }
+    { label: "下次见面", text: "现在暑假还没结束喔，狗狗和宝宝都在江山", emoji: "✈️" }
     // { label: "自定义", date: "2026-xx-xx", repeat: "", emoji: "✨" },
   ],
 

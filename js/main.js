@@ -424,6 +424,15 @@ function renderDays(){
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   $("daysGrid").innerHTML = DATA.days.map(d => {
+    // 文字模式：不显示倒计时，直接放一段话（如"下次见面"）
+    if (d.text){
+      return `
+      <div class="day-card day-textcard">
+        <div class="day-emoji">${d.emoji || "📅"}</div>
+        <div class="day-label">${d.label}</div>
+        <div class="day-text">${d.text}</div>
+      </div>`;
+    }
     const base = new Date(d.date + "T00:00:00");
     if (d.mode === "elapsed"){
       const diff = Math.floor((today - base) / 86400000);
