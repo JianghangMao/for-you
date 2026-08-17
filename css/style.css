@@ -43,7 +43,7 @@ body{
 @keyframes twinkle{ from{opacity:.55} to{opacity:.95} }
 /* 流星：偶尔划过夜空 */
 .shooting-star{ position:absolute; width:130px; height:2px; border-radius:99px; opacity:0; pointer-events:none;
-  background:linear-gradient(90deg, rgba(255,255,255,.9), rgba(183,156,255,.55) 45%, transparent);
+  background:linear-gradient(90deg, transparent, rgba(183,156,255,.55) 55%, rgba(255,255,255,.95));
   transform:rotate(30deg); }
 .ss1{ top:10%; left:-12%; animation:shoot 11s ease-in 3s infinite; }
 .ss2{ top:36%; left:-16%; animation:shoot 14s ease-in 7s infinite; }
