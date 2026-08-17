@@ -58,6 +58,7 @@
         <footer class="home-foot">
           <span class="star-egg" id="starEgg" title="?">✦</span>
           <button class="theme-btn" id="themeBtn" title="换主题">🎨 换主题</button>
+          <button class="up-link" id="upLink" title="传照片">📤 传照片</button>
           <p>Made By 狗狗</p>
         </footer>
       </div>
@@ -78,6 +79,26 @@
         <span class="lg-item"><i class="lg-dot lg-visit"></i>一起玩过的地方</span>
       </div>
       <div id="map"></div>
+    </section>
+
+    <!-- ===== 传照片（手机友好：选城市 → 选照片 → 自动上传） ===== -->
+    <section class="view" id="view-upload">
+      <h2 class="view-h">📤 传照片</h2>
+      <p class="view-tip">从手机相册选照片，直接传到云端</p>
+      <div class="up-wrap">
+        <div class="up-city-title">这些照片拍在哪儿？</div>
+        <div class="up-city" id="upCity"></div>
+        <label class="up-btn">
+          <input type="file" id="upFile" accept="image/*" multiple hidden>
+          <span class="up-btn-icon">＋</span>
+          <span class="up-btn-text">从相册选择照片</span>
+        </label>
+        <div class="up-progress hidden" id="upProgress">
+          <div class="up-bar"><div class="up-bar-in" id="upBar"></div></div>
+          <p id="upStatus"></p>
+        </div>
+        <div class="up-thumbs" id="upThumbs"></div>
+      </div>
     </section>
 
     <!-- ===== 城市选择面板（点省份后弹出） ===== -->

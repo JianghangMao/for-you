@@ -121,22 +121,25 @@ function boot(){
   $("secretText").textContent = DATA.secret;
   renderDays();
   renderWishlist();
+  renderUpCities();
   $("editBtn").classList.remove("hidden");
 
   route();
 }
 
 /* ---------- 路由：主页 <-> 板块 ---------- */
-const VIEWS = ["home", ...SECTIONS.map(s => s.id)];
+const VIEWS = ["home", ...SECTIONS.map(s => s.id), "upload"];
 let pendingGalleryScroll = null;   // 地图跳相册时记录要滚动到的地点
 function route(){
   let h = location.hash.replace("#","") || "home";
   if (!VIEWS.includes(h)) h = "home";
+  // 传照片页需要编辑密码才能进（本次会话记住）
+  if (h === "upload" && !ensureUpAuth()){ h = "home"; location.hash = "home"; }
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   $("view-" + h).classList.add("active");
   $("app").classList.toggle("in-sub", h !== "home");
   const sec = SECTIONS.find(s => s.id === h);
-  $("topbarTitle").textContent = sec ? sec.title : "";
+  $("topbarTitle").textContent = h === "upload" ? "传照片" : (sec ? sec.title : "");
   $("view-" + h).scrollTop = 0;
   if (h === "map"){ initMap(); setTimeout(() => chart && chart.resize(), 220); }
   // 从地图跳过来：滚动到对应地点分组并高亮一下
@@ -291,6 +294,61 @@ async function handleUpload(elId, files){
   toast(Cloud.enabled ? "已上传到云端" : "已添加到本地");
   renderGallery(elId);
 }
+
+/* ---------- 传照片页（手机友好：选城市 → 选照片 → 自动上传） ---------- */
+const UP_AUTH_KEY = "upload_auth_ok";
+const UP_PLACE_KEY = "upload_place";
+function ensureUpAuth(){
+  if (sessionStorage.getItem(UP_AUTH_KEY) === "1") return true;
+  const pw = prompt("请输入编辑密码：");
+  if (pw === null) return false;
+  if (pw === String(CONFIG.editPassword)){ sessionStorage.setItem(UP_AUTH_KEY, "1"); return true; }
+  toast("编辑密码不对"); return false;
+}
+function renderUpCities(){
+  const cities = ["日常"];
+  DATA.provinces.forEach(p => (p.cities || []).forEach(c => { if (!cities.includes(c.name)) cities.push(c.name); }));
+  const last = localStorage.getItem(UP_PLACE_KEY) || "日常";
+  $("upCity").innerHTML = cities.map(c =>
+    `<button class="up-chip ${c === last ? "on" : ""}" data-c="${c}">${c}</button>`).join("");
+  $("upCity").querySelectorAll(".up-chip").forEach(b => b.addEventListener("click", () => {
+    localStorage.setItem(UP_PLACE_KEY, b.dataset.c);
+    $("upCity").querySelectorAll(".up-chip").forEach(x => x.classList.toggle("on", x === b));
+  }));
+}
+async function uploadMany(files){
+  if (!files || !files.length) return;
+  if (!Cloud.enabled){ toast("云端未配置，无法上传"); return; }
+  const place = localStorage.getItem(UP_PLACE_KEY) || "日常";
+  const list = [...files];
+  $("upProgress").classList.remove("hidden");
+  $("upThumbs").innerHTML = "";
+  let ok = 0, fail = 0;
+  for (let i = 0; i < list.length; i++){
+    $("upStatus").textContent = `正在上传 ${i + 1}/${list.length}…`;
+    $("upBar").style.width = Math.round(i / list.length * 100) + "%";
+    try {
+      const blob = await fileToBlob(list[i]);
+      if (!blob) throw new Error("图片处理失败");
+      await Cloud.upload("gallery", blob, "", place);
+      ok++;
+      const thumb = document.createElement("img");
+      thumb.src = URL.createObjectURL(list[i]);
+      thumb.className = "up-thumb";
+      $("upThumbs").appendChild(thumb);
+    } catch (err){ fail++; console.warn(err); }
+    $("upBar").style.width = Math.round((i + 1) / list.length * 100) + "%";
+  }
+  $("upStatus").textContent = fail
+    ? `完成：成功 ${ok} 张，失败 ${fail} 张（失败的可重新选一次）`
+    : `完成：已上传 ${ok} 张到「${place}」✅`;
+  $("upBar").style.width = "100%";
+  toast(`已上传 ${ok} 张`);
+  $("upFile").value = "";
+  renderGallery("gallery");   // 刷新相册缓存，进相册就是最新的
+}
+$("upFile").addEventListener("change", e => uploadMany(e.target.files));
+$("upLink").addEventListener("click", () => { location.hash = "upload"; });
 
 async function editItem(elId, i){
   const g = albumCache[elId][i];
