@@ -1,0 +1,35 @@
+# =========================================================
+# 定时唤醒 Supabase 免费项目
+# —— Supabase 免费版约 7 天无访问会自动休眠（暂停）。
+#    这个任务每天自动"敲门"一次，让项目保持活跃，永不休眠。
+# —— 每天北京时间早上 08:00（UTC 00:00）自动运行。
+# —— 也可以手动触发：GitHub 仓库 → Actions → Wake Supabase → Run workflow
+# =========================================================
+
+name: Wake Supabase
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # 每天 UTC 00:00 = 北京时间 08:00
+  workflow_dispatch: {}    # 允许手动触发
+
+jobs:
+  wake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase 保持项目活跃
+        env:
+          SB_URL: https://lrqvtmvviawkbttxkrwq.supabase.co
+          SB_KEY: sb_publishable_KROPaPkL4qwUF9A4aYe34Q_sM_bUSBX
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 \
+            -H "apikey: ${SB_KEY}" \
+            -H "Authorization: Bearer ${SB_KEY}" \
+            "${SB_URL}/rest/v1/photos?select=id&limit=1")
+          echo "Supabase 响应 HTTP: $code"
+          if [ "$code" = "200" ]; then
+            echo "✅ 项目活跃，唤醒成功"
+          else
+            echo "::error::Supabase 返回 $code —— 项目可能已暂停，请到 supabase.com 手动 Resume project"
+            exit 1
+          fi
