@@ -4,6 +4,46 @@
    ========================================================= */
 const $ = (id) => document.getElementById(id);
 
+/* ---------- 多主题切换 ----------
+   主题的配色定义在 css/style.css 里（body.theme-xxx 覆盖变量）。
+   选择会保存在浏览器本地，下次打开保持。 */
+const THEMES = [
+  { id:"default", name:"紫绿梦幻", c1:"#b79cff", c2:"#84e8c0" },
+  { id:"gold",    name:"暖金夜色", c1:"#e8c9a0", c2:"#f5e6d3" },
+  { id:"sakura",  name:"樱花粉梦", c1:"#f2a6c0", c2:"#ffd9e6" },
+  { id:"mint",    name:"薄荷清夜", c1:"#7fd4e8", c2:"#9ff0d0" },
+];
+const THEME_KEY = "site_theme";
+function currentTheme(){ return localStorage.getItem(THEME_KEY) || "default"; }
+function applyTheme(id){
+  if (!id) id = "default";
+  document.body.classList.remove(...THEMES.map(t => "theme-" + t.id));
+  if (id !== "default") document.body.classList.add("theme-" + id);
+  localStorage.setItem(THEME_KEY, id);
+  $("themePanel").querySelectorAll(".theme-opt").forEach(o =>
+    o.classList.toggle("on", o.dataset.theme === id));
+  // 地图颜色随主题：若地图已初始化则重绘
+  if (chart){ chart.dispose(); chart = null; }
+  if (location.hash === "#map") setTimeout(() => initMap(), 60);
+}
+/* 初始化主题面板 + 应用已保存的主题 */
+(function initThemeUI(){
+  $("themePanel").innerHTML = THEMES.map(t => `
+    <button class="theme-opt" data-theme="${t.id}">
+      <span class="theme-dot" style="background:linear-gradient(135deg,${t.c1},${t.c2})"></span>
+      <span>${t.name}</span>
+    </button>`).join("");
+  $("themePanel").querySelectorAll(".theme-opt").forEach(o =>
+    o.addEventListener("click", () => { applyTheme(o.dataset.theme); $("themePanel").classList.add("hidden"); }));
+  $("themeBtn").addEventListener("click", e => { e.stopPropagation(); $("themePanel").classList.toggle("hidden"); });
+  document.addEventListener("click", e => {
+    if (!$("themePanel").classList.contains("hidden") && !e.target.closest("#themePanel") && !e.target.closest("#themeBtn"))
+      $("themePanel").classList.add("hidden");
+  });
+  const t = currentTheme();
+  if (t !== "default") document.body.classList.add("theme-" + t);
+})();
+
 /* ---------- 主页入口定义（顺序/文字/大小 改这里即可）
    size 可填 "lg"(大块) / "wide"(宽块) / ""(普通) ---------- */
 const SECTIONS = [
@@ -326,12 +366,14 @@ $("projBtn").addEventListener("click", () => openLightbox(albumCache["gallery"] 
 
 /* ---------- 省份地图（ECharts，懒加载） ---------- */
 let chart = null;
-/* 地图三色：home=狗狗在的地方(紫) / her=宝宝在的地方(绿) / visited=一起玩过(暖金发光) */
-const MAP_STYLE = {
-  home:    { areaColor:"#b79cff", borderColor:"#d6c9ff", shadowColor:"#b79cff", shadowBlur:10, hi:"#c9b4ff" },
-  her:     { areaColor:"#4fd6a6", borderColor:"#84e8c0", shadowColor:"#4fd6a6", shadowBlur:10, hi:"#84e8c0" },
-  visited: { areaColor:"#ffc46b", borderColor:"#ffd9a0", shadowColor:"#ffc46b", shadowBlur:18, hi:"#ffd9a0" },
+/* 地图三色随主题：home=狗狗在的地方 / her=宝宝在的地方 / visit=一起玩过(暖金发光) */
+const MAP_THEME_COLORS = {
+  default:{ home:"#b79cff", homeHi:"#d6c9ff", her:"#4fd6a6", herHi:"#84e8c0", visit:"#ffc46b", visitHi:"#ffd9a0" },
+  gold:   { home:"#e8c9a0", homeHi:"#f2dcbc", her:"#f5e6d3", herHi:"#fff3e0", visit:"#ffc46b", visitHi:"#ffd9a0" },
+  sakura: { home:"#f2a6c0", homeHi:"#ffc4d8", her:"#ffd9e6", herHi:"#ffeef4", visit:"#ffc46b", visitHi:"#ffd9a0" },
+  mint:   { home:"#7fd4e8", homeHi:"#a8e4f2", her:"#9ff0d0", herHi:"#c8f8e6", visit:"#ffc46b", visitHi:"#ffd9a0" },
 };
+function mapColors(){ return MAP_THEME_COLORS[currentTheme()] || MAP_THEME_COLORS.default; }
 function coreName(n){ return n.replace(/(省|市|自治区|特别行政区|维吾尔|壮族|回族|自治州)/g, ""); }
 function initMap(){
   if (chart) return;
@@ -358,10 +400,12 @@ function initMap(){
           emphasis:{ label:{ show:true, color:"#0b0a18", fontSize:11 },
             itemStyle:{ areaColor:"#b79cff" } },
           data: visited.map(v => {
-            const st = MAP_STYLE[v.p.type] || MAP_STYLE.visited;
+            const mc = mapColors();
+            const k = v.p.type === "home" ? "home" : v.p.type === "her" ? "her" : "visit";
+            const area = mc[k], hi = mc[k + "Hi"];
             return { name:v.full, value:1,
-              itemStyle:{ areaColor:st.areaColor, borderColor:st.borderColor, shadowColor:st.shadowColor, shadowBlur:st.shadowBlur },
-              emphasis:{ itemStyle:{ areaColor:st.hi } } };
+              itemStyle:{ areaColor:area, borderColor:hi, shadowColor:area, shadowBlur: k === "visit" ? 18 : 10 },
+              emphasis:{ itemStyle:{ areaColor:hi } } };
           })
         }]
       });

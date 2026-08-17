@@ -14,6 +14,35 @@
   --grad:      linear-gradient(120deg, var(--purple), var(--green));
 }
 *{ box-sizing:border-box; margin:0; padding:0; }
+
+/* ===== 多主题：覆盖 :root 变量即可全局换肤（body.theme-xxx） ===== */
+body.theme-gold{
+  --bg:#0d0f14; --bg2:#1c1711;
+  --purple:#e8c9a0; --purple-d:#c4a882;
+  --green:#f5e6d3;  --green-d:#e8c9a0;
+  --ink:#f5e6d3;    --ink-dim:#b8a88e;
+  --line:rgba(232,201,160,.25);
+  --glow-p:rgba(196,168,130,.5); --glow-g:rgba(245,230,211,.4);
+  --grad:linear-gradient(120deg,#e8c9a0,#f5e6d3);
+}
+body.theme-sakura{
+  --bg:#160d16; --bg2:#251527;
+  --purple:#f2a6c0; --purple-d:#e57fa3;
+  --green:#ffd9e6;  --green-d:#f2a6c0;
+  --ink:#ffeef4;    --ink-dim:#c99db0;
+  --line:rgba(242,166,192,.28);
+  --glow-p:rgba(229,127,163,.5); --glow-g:rgba(255,217,230,.4);
+  --grad:linear-gradient(120deg,#f2a6c0,#ffd9e6);
+}
+body.theme-mint{
+  --bg:#08121a; --bg2:#0e2230;
+  --purple:#7fd4e8; --purple-d:#4fb3d6;
+  --green:#9ff0d0;  --green-d:#5fe0b0;
+  --ink:#e8f6ff;    --ink-dim:#8fb8c9;
+  --line:rgba(127,212,232,.25);
+  --glow-p:rgba(79,179,214,.5); --glow-g:rgba(95,224,176,.45);
+  --grad:linear-gradient(120deg,#7fd4e8,#9ff0d0);
+}
 html,body{ height:100%; }
 body{
   background:var(--bg); color:var(--ink);
@@ -68,7 +97,7 @@ body{
 
 /* ===== 开场打字机动画 ===== */
 .intro{ position:fixed; inset:0; z-index:55; display:flex; align-items:center; justify-content:center;
-  background:radial-gradient(circle at 50% 45%, rgba(21,18,42,.94), rgba(11,10,24,.98)); padding:2rem; }
+  background:radial-gradient(circle at 50% 45%, var(--bg2), var(--bg)); padding:2rem; }
 .intro-type{ font-family:"Ma Shan Zheng","Noto Serif SC",serif; font-size:2.3rem; letter-spacing:5px;
   color:var(--ink); text-align:center; line-height:2;
   text-shadow:0 0 24px var(--glow-p), 0 0 48px var(--glow-g); }
@@ -152,6 +181,23 @@ body{
 .home-foot{ text-align:center; color:var(--ink-dim); padding:4vh 0 1vh; }
 .star-egg{ display:block; font-size:1.3rem; color:var(--purple); cursor:pointer; margin-bottom:.6rem; user-select:none;
   text-shadow:0 0 12px var(--glow-p); }
+
+/* ===== 换主题按钮 + 面板 ===== */
+.theme-btn{ display:block; margin:0 auto .9rem; background:transparent; border:1px solid var(--line);
+  color:var(--ink-dim); border-radius:30px; padding:.35rem 1.2rem; cursor:pointer;
+  font-family:inherit; font-size:.85rem; letter-spacing:1px; transition:all .25s; }
+.theme-btn:hover{ color:var(--green); border-color:var(--green); box-shadow:0 0 14px var(--glow-g); }
+.theme-panel{ position:fixed; left:50%; bottom:110px; transform:translateX(-50%); z-index:46;
+  background:rgba(21,18,42,.93); backdrop-filter:blur(12px); border:1px solid var(--line);
+  border-radius:18px; padding:.9rem 1.2rem; display:flex; gap:1.1rem; box-shadow:0 10px 36px rgba(0,0,0,.5); }
+.theme-opt{ display:flex; flex-direction:column; align-items:center; gap:.4rem; cursor:pointer;
+  border:none; background:none; padding:0; color:var(--ink-dim); font-size:.72rem; font-family:inherit; }
+.theme-dot{ width:34px; height:34px; border-radius:50%; border:2px solid rgba(255,255,255,.22);
+  transition:transform .2s, border-color .2s, box-shadow .2s; }
+.theme-opt:hover .theme-dot{ transform:scale(1.12); }
+.theme-opt.on .theme-dot{ border-color:#fff; box-shadow:0 0 12px rgba(255,255,255,.45); }
+.theme-opt.on{ color:var(--ink); }
+@media (max-width:680px){ .theme-panel{ gap:.8rem; padding:.8rem 1rem; } .theme-dot{ width:30px; height:30px; } }
 
 /* ===== 时间线 ===== */
 .timeline{ width:100%; max-width:640px; margin:0 auto; position:relative; }

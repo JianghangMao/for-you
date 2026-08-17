@@ -57,6 +57,7 @@
         <nav class="portals" id="cards"><!-- 入口由 JS 生成 --></nav>
         <footer class="home-foot">
           <span class="star-egg" id="starEgg" title="?">✦</span>
+          <button class="theme-btn" id="themeBtn" title="换主题">🎨 换主题</button>
           <p>Made By 狗狗</p>
         </footer>
       </div>
@@ -162,6 +163,9 @@
   <!-- 编辑模式按钮（左下角齿轮，需编辑密码） -->
   <button class="edit-btn hidden" id="editBtn" title="编辑模式">⚙</button>
   <div class="toast hidden" id="toast"></div>
+
+  <!-- ===== 主题选择面板（主页点"换主题"弹出） ===== -->
+  <div class="theme-panel hidden" id="themePanel"></div>
 
   <script src="assets/vendor/echarts.min.js"></script>
   <script src="assets/vendor/supabase-js.js"></script>
