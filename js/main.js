@@ -65,8 +65,7 @@ function applyTheme(id){
   if (t !== "default") document.body.classList.add("theme-" + t);
 })();
 
-/* ---------- 主页入口定义（顺序/文字/大小 改这里即可）
-   size 可填 "lg"(大块) / "wide"(宽块) / ""(普通) ---------- */
+/* ---------- 主页入口；位置与大小由 bubbles.css 分屏控制 ---------- */
 const SECTIONS = [
   { id:"map",      icon:"🌍", title:"去过的地方", sub:"把坐标慢慢点亮",     size:"lg" },
   { id:"gallery",  icon:"📷", title:"我们的相册", sub:"一些真实的瞬间",     size:"wide" },
@@ -77,6 +76,89 @@ const SECTIONS = [
   { id:"days",     icon:"📅", title:"重要日子",   sub:"见面和纪念日",        size:"" },
   { id:"wish",     icon:"✨", title:"想做的事",   sub:"不急，一件件来",      size:"" },
 ];
+
+const BUBBLE_ICONS = {
+  gallery: '<rect x="5" y="7" width="23" height="19" rx="3"/><path d="m5 21 7-7 6 6 4-4 6 6M10 7V4h22v19h-4"/><circle cx="21" cy="12" r="1.5"/>',
+  map: '<path d="m4 8 9-4 10 4 9-4v23l-9 4-10-4-9 4ZM13 4v23M23 8v23"/><path d="M25 14c0 4-5 8-5 8s-5-4-5-8a5 5 0 0 1 10 0Z"/><circle cx="20" cy="14" r="1.5"/>',
+  timeline: '<path d="M8 8c-6 6-4 18 6 21 10 3 19-6 16-16C27 3 16 1 8 8ZM8 8V2M8 8h6M18 10v8l6 3"/>',
+  her: '<rect x="4" y="10" width="28" height="20" rx="4"/><path d="m11 10 3-5h8l3 5"/><circle cx="18" cy="20" r="6"/><path d="M27 15h1"/>',
+  letter: '<rect x="4" y="8" width="28" height="21" rx="3"/><path d="m5 10 13 10 13-10M5 27l9-10M31 27l-9-10"/>',
+  sleep: '<path d="M28 24A13 13 0 0 1 13 4a13 13 0 1 0 15 20Z"/><path d="m26 5 1.4 4.6L32 11l-4.6 1.4L26 17l-1.4-4.6L20 11l4.6-1.4Z"/>',
+  days: '<rect x="5" y="8" width="26" height="24" rx="4"/><path d="M5 15h26M12 4v8M24 4v8M12 21h3M21 21h3M12 27h3"/>',
+  wish: '<path d="m18 3 3.8 9.2L32 13l-7.8 6.7L26.5 30 18 24.7 9.5 30l2.3-10.3L4 13l10.2-.8Z"/>',
+};
+
+function bubbleMarkup(section){
+  const id = section.id;
+  const outline = 'M100 8a92 92 0 1 1 0 184a92 92 0 1 1 0-184Z';
+  return `<a class="bubble bubble--${id}" data-bubble href="#${id}" aria-label="${section.title}">
+    <span class="bubble-rest"><span class="bubble-surface">
+      <svg class="bubble-film" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+        <defs>
+          <radialGradient id="film-${id}" cx="30%" cy="20%" r="85%">
+            <stop offset="0" stop-color="#ffffff" stop-opacity=".16"/>
+            <stop offset=".38" stop-color="var(--bubble-tint)" stop-opacity=".075"/>
+            <stop offset=".72" stop-color="var(--bg)" stop-opacity=".04"/>
+            <stop offset="1" stop-color="var(--bubble-tint)" stop-opacity=".19"/>
+          </radialGradient>
+          <linearGradient id="rim-${id}" x1="12%" y1="2%" x2="83%" y2="100%">
+            <stop stop-color="#fff5ec" stop-opacity=".88"/>
+            <stop offset=".2" stop-color="var(--purple)" stop-opacity=".68"/>
+            <stop offset=".43" stop-color="var(--green)" stop-opacity=".14"/>
+            <stop offset=".65" stop-color="var(--purple)" stop-opacity=".35"/>
+            <stop offset=".86" stop-color="var(--green)" stop-opacity=".85"/>
+            <stop offset="1" stop-color="#fff5ec" stop-opacity=".58"/>
+          </linearGradient>
+          <radialGradient id="pearl-${id}" cx="75%" cy="92%" r="65%">
+            <stop stop-color="var(--green)" stop-opacity=".22"/>
+            <stop offset=".5" stop-color="var(--purple)" stop-opacity=".055"/>
+            <stop offset="1" stop-color="var(--purple)" stop-opacity="0"/>
+          </radialGradient>
+          <clipPath id="clip-${id}"><path data-membrane d="${outline}"/></clipPath>
+        </defs>
+        <path data-membrane d="${outline}" fill="url(#film-${id})"/>
+        <path data-membrane d="${outline}" fill="url(#pearl-${id})" stroke="url(#rim-${id})" stroke-width=".95"/>
+        <g clip-path="url(#clip-${id})" fill="none" stroke-linecap="round">
+          <path class="bubble-highlight" d="M30 52C47 21 87 12 117 20" stroke="url(#rim-${id})" stroke-width="2.2"/>
+          <path d="M34 54C49 29 75 21 93 21" stroke="#fff6ff" stroke-opacity=".22" stroke-width=".65"/>
+          <path d="M76 185C125 199 175 161 184 119" stroke="url(#rim-${id})" stroke-width="3.4" opacity=".45"/>
+          <path d="M16 107C15 130 27 155 43 167" stroke="var(--purple)" stroke-width="1.8" opacity=".26"/>
+        </g>
+      </svg>
+      <span class="bubble-content">
+        <svg class="bubble-icon" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${BUBBLE_ICONS[id]}</svg>
+        <span class="bubble-title">${section.title}</span>
+        <span class="bubble-sub">${section.sub}</span>
+      </span>
+      <span class="bubble-enter" aria-hidden="true">↗</span>
+      <span class="bubble-ripples" aria-hidden="true"></span>
+    </span></span>
+  </a>`;
+}
+
+// A single soft expansion connects the selected bubble to its page.
+$("cards").addEventListener("bubbleactivate", event => {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const anchor = event.target.closest(".bubble");
+  if (!anchor || !Element.prototype.animate) return;
+  const rect = anchor.getBoundingClientRect();
+  if (!rect.width) return;
+  const veil = document.createElement("div");
+  veil.className = "bubble-opening";
+  veil.setAttribute("aria-hidden", "true");
+  Object.assign(veil.style, {
+    left: rect.left + "px", top: rect.top + "px",
+    width: rect.width + "px", height: rect.height + "px",
+  });
+  document.body.appendChild(veil);
+  const expansion = 2 * Math.hypot(innerWidth, innerHeight) / rect.width;
+  const animation = veil.animate([
+    { transform: "scale(1)", opacity: .25 },
+    { transform: `scale(${expansion})`, opacity: .25, offset: .65 },
+    { transform: `scale(${expansion})`, opacity: 0 },
+  ], { duration: 520, easing: "cubic-bezier(.25,.65,.25,1)" });
+  animation.finished.catch(() => {}).then(() => veil.remove());
+});
 
 /* ---------- 密码门 ---------- */
 $("gateTitle").textContent = CONFIG.gateTitle || `给 ${CONFIG.herName} · ${CONFIG.coverTitle}`;
@@ -112,20 +194,16 @@ $("gateInput").addEventListener("keydown", e => { if (e.key === "Enter") tryEnte
 /* ---------- 启动渲染 ---------- */
 function boot(){
   // 主页文字
+  $("heroMyName").textContent = CONFIG.myName;
+  $("heroHerName").textContent = CONFIG.herName;
+  $("homeSince").textContent = "始于 " + CONFIG.anniversary.replace(/-/g, ".");
   $("heroGreet").textContent = CONFIG.coverSubtitle;
-  $("distLine").innerHTML = `${CONFIG.cityA.name} <b>${CONFIG.distanceKm}km</b> ${CONFIG.cityB.name}`;
+  $("distLine").innerHTML = `<span>${CONFIG.cityA.name}</span><span class="distance-thread" aria-hidden="true"></span><b>${CONFIG.distanceKm} km</b><span class="distance-thread" aria-hidden="true"></span><span>${CONFIG.cityB.name}</span>`;
   updateTimer(); setInterval(updateTimer, 1000);
   updateBday();
 
-  // 入口传送门
-  $("cards").innerHTML = SECTIONS.map(s => `
-    <div class="portal ${s.size||""}" data-go="${s.id}">
-      <span class="c-icon">${s.icon}</span>
-      <div class="c-title">${s.title}</div>
-      <div class="c-sub">${s.sub}</div>
-    </div>`).join("");
-  $("cards").querySelectorAll(".portal").forEach(c =>
-    c.addEventListener("click", () => location.hash = c.dataset.go));
+  $("cards").innerHTML = SECTIONS.map(bubbleMarkup).join("");
+  if (window.BubbleField) window.BubbleField.mount($("cards"));
 
   // 各板块内容
   renderTimeline();
@@ -190,7 +268,7 @@ function updateTimer(){
   const days = Math.floor(diff/86400); diff -= days*86400;
   const h = Math.floor(diff/3600); diff -= h*3600;
   const m = Math.floor(diff/60); const s = diff - m*60;
-  $("timer").innerHTML = `我们在一起 <b>${days}</b> 天 <b>${pad(h)}</b>:<b>${pad(m)}</b>:<b>${pad(s)}</b>`;
+  $("timer").innerHTML = `<span class="timer-label">已经一起走过</span><span class="timer-days"><b>${days.toLocaleString("zh-CN")}</b><span>天</span></span><span class="timer-clock">${pad(h)} <i>:</i> ${pad(m)} <i>:</i> ${pad(s)}</span>`;
 }
 
 /* ---------- 生日倒计时 ---------- */

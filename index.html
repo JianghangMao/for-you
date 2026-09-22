@@ -2,12 +2,14 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Lovesite</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#100e1b" />
+  <title>狗狗和宝宝 · 我们的小小世界</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;500;700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/bubbles.css" />
 </head>
 <body>
   <!-- 梦幻背景层 -->
@@ -15,18 +17,21 @@
     <div class="nebula nebula-p"></div>
     <div class="nebula nebula-g"></div>
     <div class="stars"></div>
-    <div class="shooting-star ss1"></div>
-    <div class="shooting-star ss2"></div>
-    <div class="shooting-star ss3"></div>
+    <div class="waterlight"></div>
+    <div class="sky-contour sky-contour-one"></div>
+    <div class="sky-contour sky-contour-two"></div>
   </div>
 
   <!-- ========== 密码门 ========== -->
   <section id="gate">
     <div class="gate-box">
+      <div class="gate-orb" aria-hidden="true"><span> &amp; </span></div>
+      <p class="gate-overline">狗狗 &amp; 宝宝</p>
       <p class="gate-hint" id="gateTitle"></p>
-      <input id="gateInput" type="password" inputmode="numeric" maxlength="8" placeholder="输入密码" />
+      <label class="sr-only" for="gateInput">输入纪念日密码</label>
+      <input id="gateInput" type="password" inputmode="numeric" maxlength="8" placeholder="输入密码" autocomplete="off" />
       <button id="gateBtn">进入</button>
-      <p class="gate-err" id="gateErr"></p>
+      <p class="gate-err" id="gateErr" role="status"></p>
     </div>
   </section>
 
@@ -43,23 +48,32 @@
       <span class="topbar-title" id="topbarTitle"></span>
     </header>
 
-    <!-- ===== 主页（枢纽 / 游戏式主菜单） ===== -->
+    <!-- ===== 主页：位置固定、触碰时回应的泡泡 ===== -->
     <section class="view active" id="view-home">
       <div class="hub">
-        <div class="hub-core">
-          <div class="moon"></div>
-          <p class="hero-greet" id="heroGreet"></p>
-          <div class="timer" id="timer"></div>
-          <div class="hero-meta">
-            <span id="distLine"></span><span class="dot">·</span><span id="bday"></span>
-          </div>
+        <div class="home-masthead">
+          <span class="home-wordmark"><i aria-hidden="true"></i> 我们的小小世界</span>
+          <span class="home-since" id="homeSince">始于 2023.03.28</span>
         </div>
-        <nav class="portals" id="cards"><!-- 入口由 JS 生成 --></nav>
+        <div class="home-scene">
+        <div class="hub-core">
+          <p class="hero-overline">两个人的日常</p>
+          <h1 class="hero-title"><span id="heroMyName">狗狗</span><span class="hero-amp">&amp;</span><span id="heroHerName">宝宝</span></h1>
+          <p class="hero-greet" id="heroGreet"></p>
+          <div class="timer" id="timer" aria-label="恋爱计时"></div>
+          <div class="hero-meta">
+            <span id="distLine"></span><span id="bday"></span>
+          </div>
+          <p class="touch-hint"><span aria-hidden="true">◌</span> 轻轻碰一下，打开一段日常</p>
+        </div>
+        <nav class="bubble-field" id="cards" aria-label="回忆与日常"><!-- 入口由 JS 生成 --></nav>
+        </div>
         <footer class="home-foot">
-          <span class="star-egg" id="starEgg" title="?">✦</span>
-          <button class="theme-btn" id="themeBtn" title="换主题">🎨 换主题</button>
-          <button class="up-link" id="upLink" title="传照片">📤 传照片</button>
-          <p>Made By 狗狗</p>
+          <div class="home-signature"><button class="star-egg" id="starEgg" type="button" aria-label="一颗小星星" title="?">✧</button><span>Made by 狗狗</span></div>
+          <div class="home-tools">
+            <button class="theme-btn" id="themeBtn" type="button"><span class="theme-swirl" aria-hidden="true"></span>换个颜色</button>
+            <button class="up-link" id="upLink" type="button"><span aria-hidden="true">＋</span>添张照片</button>
+          </div>
         </footer>
       </div>
     </section>
@@ -213,6 +227,7 @@
   <script src="js/data.js"></script>
   <script src="js/store.js"></script>
   <script src="js/cloud.js"></script>
+  <script src="js/bubbles.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
