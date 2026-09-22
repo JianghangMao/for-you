@@ -188,12 +188,20 @@
   <audio id="audio"></audio>
 
   <!-- ===== 大图 / 投影 ===== -->
-  <div class="lightbox hidden" id="lightbox">
-    <button class="lb-close" id="lbClose">✕</button>
-    <button class="lb-prev" id="lbPrev">‹</button>
-    <img id="lbImg" src="" alt="" />
-    <p class="lb-cap" id="lbCap"></p>
-    <button class="lb-next" id="lbNext">›</button>
+  <div class="lightbox hidden" id="lightbox" role="dialog" aria-modal="true" aria-label="照片浏览">
+    <button class="lb-close" id="lbClose" aria-label="关闭照片">✕</button>
+    <span id="lbCount" class="lb-count" aria-live="polite"></span>
+    <button class="lb-prev" id="lbPrev" aria-label="上一张">‹</button>
+    <div id="lbStage" class="lb-stage"><img id="lbImg" alt="" /></div>
+    <button class="lb-next" id="lbNext" aria-label="下一张">›</button>
+    <div class="lb-bottom">
+      <p class="lb-cap" id="lbCap"></p>
+      <div class="lb-tools">
+        <button id="lbZoom" aria-pressed="false">放大 2 倍</button>
+        <button id="lbCover" hidden>设为本机封面</button>
+        <span id="lbProjection" hidden><button id="lbPause">暂停</button><label>间隔 <select id="lbSpeed"><option value="3000">3 秒</option><option value="4500" selected>4.5 秒</option><option value="7000">7 秒</option><option value="10000">10 秒</option></select></label></span>
+      </div>
+    </div>
   </div>
 
   <!-- ===== 悄悄话 ===== -->

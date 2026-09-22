@@ -90,7 +90,14 @@
       item.surface.style.setProperty('--touch-x', point.px + '%');
       item.surface.style.setProperty('--touch-y', point.py + '%');
       if (reducedMotion() || !active) return;
-      var angle = Math.atan2(point.y - CENTER, point.x - CENTER);
+      var dx = point.x - CENTER, dy = point.y - CENTER;
+      var proximity = Math.min(1, Math.sqrt(dx * dx + dy * dy) / RADIUS);
+      // Centre touches make a ripple; edge touches push the nearby membrane.
+      var influence = Math.max(0, (proximity - 0.2) / 0.8);
+      depth *= influence * influence * (3 - 2 * influence);
+      item.surface.style.setProperty('--shine-x', ((point.px - 50) * 0.09) + 'px');
+      item.surface.style.setProperty('--shine-y', ((point.py - 50) * 0.07) + 'px');
+      var angle = Math.atan2(dy, dx);
       // A compact Gaussian response makes a dent and lets nearby film follow it.
       for (var i = 0; i < POINTS; i += 1) {
         var sampleAngle = i / POINTS * Math.PI * 2 - Math.PI / 2;
@@ -102,6 +109,8 @@
 
     function release(item) {
       item.pressed = false;
+      item.surface.style.setProperty('--shine-x', '0px');
+      item.surface.style.setProperty('--shine-y', '0px');
       item.target.fill(0);
       if (!reducedMotion() && active) ensureFrame(item);
     }
@@ -226,7 +235,7 @@
         if (item.pressed) setContact(item, pointFromEvent(surface, event), 12);
       });
       addListener(anchor, 'pointerleave', function (event) {
-        if (event.pointerType !== 'touch') release(item);
+        release(item);
       });
       addListener(anchor, 'pointerdown', function (event) {
         if (event.button !== 0) return;
@@ -249,6 +258,8 @@
       if (raf) { cancelAnimationFrame(raf); raf = 0; }
       bubbles.forEach(function (item) {
         item.value.fill(0); item.velocity.fill(0); item.target.fill(0); item.pressed = false;
+        item.surface.style.setProperty('--shine-x', '0px');
+        item.surface.style.setProperty('--shine-y', '0px');
         draw(item);
       });
     }

@@ -229,7 +229,10 @@ function boot(){
 /* ---------- 路由：主页 <-> 板块 ---------- */
 const VIEWS = ["home", ...SECTIONS.map(s => s.id), "upload"];
 let pendingGalleryScroll = null;   // 地图跳相册时记录要滚动到的地点
+const viewScroll = new Map();
 function route(){
+  const previous = document.querySelector(".view.active");
+  if (previous) viewScroll.set(previous.id, previous.scrollTop);
   let h = location.hash.replace("#","") || "home";
   if (!VIEWS.includes(h)) h = "home";
   // 传照片页需要编辑密码才能进（本次会话记住）
@@ -241,7 +244,7 @@ function route(){
   $("app").classList.toggle("in-sub", h !== "home");
   const sec = SECTIONS.find(s => s.id === h);
   $("topbarTitle").textContent = h === "upload" ? "传照片" : (sec ? sec.title : "");
-  $("view-" + h).scrollTop = 0;
+  $("view-" + h).scrollTop = viewScroll.get("view-" + h) || 0;
   if (h === "map"){ initMap(); setTimeout(() => chart && chart.resize(), 220); }
   // 从地图跳过来：滚动到对应地点分组并高亮一下
   if (h === "gallery" && pendingGalleryScroll){
@@ -250,6 +253,8 @@ function route(){
     setTimeout(() => {
       const el = document.getElementById("gg-" + encodeURIComponent(target));
       if (!el) return;
+      const album = el.querySelector("details");
+      if (album) { album.open = true; hydrateAlbum(album); }
       el.scrollIntoView({ behavior:"smooth", block:"start" });
       el.classList.add("flash");
       setTimeout(() => el.classList.remove("flash"), 1600);
@@ -309,7 +314,25 @@ function storyFor(place){
   return (p && p.story) ? p.story : "";
 }
 
+const galleryVersions = {};
+const expandedAlbums = new Set();
+let albumCovers = {};
+try { albumCovers = JSON.parse(localStorage.getItem("albumCovers") || "{}"); if (!albumCovers || typeof albumCovers !== "object") albumCovers = {}; } catch (_) {}
+// Original sample paths have no files in this project; retain data but omit from display.
+const missingSamplePhotos = new Set(["photos/g1.jpg", "photos/g2.jpg", "photos/g3.jpg", "photos/her1.jpg", "photos/her2.jpg"]);
+function realPhoto(photo){ return !!photo.src && !/placeholder/i.test(photo.src) && !missingSamplePhotos.has(photo.src); }
+
+function galleryEscape(value){
+  return String(value == null ? "" : value).replace(/[&<>"']/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '\"':"&quot;", "'":"&#39;"}[c]));
+}
+function hydrateAlbum(album){
+  album.querySelectorAll("img[data-src]").forEach(img => {
+    img.src = img.dataset.src;
+    delete img.dataset.src;
+  });
+}
 async function renderGallery(elId){
+  const version = galleryVersions[elId] = (galleryVersions[elId] || 0) + 1;
   const meta = ALBUMS[elId];
   // 云端/本地加载失败也要容错：不中断渲染，只提示
   let cloud = [], local = [], cloudErr = false;
@@ -318,52 +341,75 @@ async function renderGallery(elId){
   try { local = await Store.byAlbum(meta.album); }
   catch (err){ console.warn("[gallery] 本地照片读取失败：", err); }
   const list = [
-    ...meta.base(),
+    ...meta.base().filter(realPhoto),
     ...cloud.map(c => ({ src:c.src, caption:c.caption, place:c.place||"", _id:c.id, _src:"cloud", _path:c.path })),
     ...local.map(p => ({ src:p.src, caption:p.caption||"", place:p.place||"", _id:p.id, _src:"local" })),
   ];
+  if (version !== galleryVersions[elId]) return;
   albumCache[elId] = list;
 
-  const figureHTML = (g, i) => `
+  const figureHTML = (g, i, deferred = false) => `
     <figure data-i="${i}">
-      <img src="${g.src}" alt="" onerror="this.src='assets/placeholder.svg'">
-      <figcaption class="gal-cap">${g.caption || ""}</figcaption>
-      ${editMode && g._id ? `<button class="del" data-id="${g._id}" data-src="${g._src}" data-path="${g._path||""}">✕</button>` : ""}
+      <button class="photo-open" type="button" aria-label="${galleryEscape(g.caption || g.place || "照片")}，${editMode ? "编辑" : "查看大图"}">
+        <img ${deferred ? "data-src" : "src"}="${galleryEscape(g.src)}" loading="lazy" decoding="async" alt="${galleryEscape(g.caption || "")}" onerror="this.onerror=null;this.src='assets/placeholder.svg'">
+      </button>
+      <figcaption class="gal-cap">${galleryEscape(g.caption || "")}</figcaption>
+      ${editMode && g._id ? `<button class="del" data-id="${galleryEscape(g._id)}" data-src="${galleryEscape(g._src)}" data-path="${galleryEscape(g._path||"")}">✕</button>` : ""}
     </figure>`;
 
   let html = "";
-  if (cloudErr) html += `<p class="gallery-tip">☁ 云端照片没加载出来（网络不稳？），先看看这些</p>`;
+  if (cloudErr) html += `<p class="gallery-tip">云端照片暂时没加载出来，可以稍后重新进入。</p>`;
+  if (!list.length) html += `<p class="gallery-tip">这里还没有照片，去「添张照片」留下第一张吧。</p>`;
   if (elId === "gallery" && list.length){
-    // 按地点分组：有 place 的按 place 分，没 place 的归"日常"放最后
-    const groups = {};
+    const groups = new Map();
     list.forEach((g, i) => {
-      const p = g.place || "日常";
-      (groups[p] = groups[p] || []).push({ g, i });
+      const place = g.place || "日常";
+      if (!groups.has(place)) groups.set(place, []);
+      groups.get(place).push({g, i});
     });
-    const names = Object.keys(groups).filter(n => n !== "日常");
-    if (groups["日常"]) names.push("日常");
+    const names = [...groups.keys()].filter(n => n !== "日常");
+    if (groups.has("日常")) names.push("日常");
+    names.sort((a,b) => Number(groups.get(b).some(it => realPhoto(it.g))) - Number(groups.get(a).some(it => realPhoto(it.g))));
     names.forEach(name => {
-      const items = groups[name];
-      html += `<div class="gallery-group" id="gg-${encodeURIComponent(name)}">`;
-      html += `<h3 class="gg-title">${name}<span class="gg-count">${items.length}</span></h3>`;
+      const items = groups.get(name), cover = items.find(it => it.g.src === albumCovers[name] && realPhoto(it.g)) || items.find(it => realPhoto(it.g)) || items[0];
+      const open = editMode || expandedAlbums.has(name);
       const story = storyFor(name);
-      if (story) html += `<p class="gg-story">${story}</p>`;
-      html += `<div class="gallery-grid">`;
-      items.forEach(it => { html += figureHTML(it.g, it.i); });
-      html += `</div></div>`;
+      html += `<section class="gallery-group album-chapter" id="gg-${encodeURIComponent(name)}">
+        <div class="album-lead">
+          <div class="album-cover">${figureHTML(cover.g, cover.i)}</div>
+          <div class="album-intro"><p class="album-count">${items.length} 张照片</p>
+            <h3 class="gg-title">${galleryEscape(name)}</h3>
+            ${story ? `<p class="gg-story">${galleryEscape(story)}</p>` : ""}
+            <p class="album-cover-hint">点照片，慢慢看</p>
+          </div>
+        </div>`;
+      if (items.length > 1) html += `<details class="album-details" data-place="${galleryEscape(name)}" ${open ? "open" : ""}>
+        <summary><span class="album-expand">展开其余 ${items.length - 1} 张照片</span><span class="album-collapse">收起照片</span><span aria-hidden="true">＋</span></summary>
+        <div class="gallery-grid">${items.filter(it => it !== cover).map(it => figureHTML(it.g, it.i, !open)).join("")}</div>
+      </details>`;
+      html += `</section>`;
     });
-  } else {
-    html += `<div class="gallery-grid">` + list.map((g,i) => figureHTML(g, i)).join("") + `</div>`;
+  } else if (list.length) {
+    html += `<div class="gallery-grid photography-grid">` + list.map((g,i) => figureHTML(g, i)).join("") + `</div>`;
   }
   if (editMode)
     html += `<div class="gallery-grid"><button class="add-tile" type="button" data-add="${elId}"><span>＋</span>添加照片</button></div>`;
+  const view = $(elId).closest(".view");
+  const savedScroll = view.classList.contains("active") ? view.scrollTop : (viewScroll.get(view.id) || 0);
   $(elId).innerHTML = html;
+  view.scrollTop = savedScroll;
+  $(elId).querySelectorAll(".album-details").forEach(album => {
+    album.addEventListener("toggle", () => {
+      if (album.open) { expandedAlbums.add(album.dataset.place); hydrateAlbum(album); }
+      else expandedAlbums.delete(album.dataset.place);
+    });
+  });
 
   $(elId).querySelectorAll("figure").forEach(f => {
     const i = +f.dataset.i;
-    f.querySelector("img").addEventListener("click", () => {
+    f.querySelector(".photo-open").addEventListener("click", () => {
       if (editMode) editItem(elId, i);
-      else openLightbox(albumCache[elId], i, false);
+      else openLightbox(albumCache[elId], i, false, elId);
     });
   });
   if (editMode){
@@ -586,30 +632,99 @@ function toast(msg, ms){
 
 /* ---------- 大图 / 投影 ---------- */
 let lbList = [], lbIdx = 0, projTimer = null;
-function openLightbox(list, idx, projection){
-  lbList = list; lbIdx = idx;
+let lbAlbum = "", lbZoom = false, lbPlaying = false, lbReturnFocus = null;
+function scheduleProjection(){
+  clearInterval(projTimer); projTimer = null;
+  $("lbPause").textContent = lbPlaying ? "暂停" : "继续播放";
+  if (lbPlaying && !document.hidden) projTimer = setInterval(() => stepLb(1), Number($("lbSpeed").value));
+}
+function setLbZoom(zoom){
+  const imageWidth = $("lbImg").getBoundingClientRect().width;
+  lbZoom = zoom;
+  $("lbImg").style.width = zoom ? `${imageWidth * 2}px` : "";
+  $("lbImg").style.maxHeight = zoom ? "none" : "";
+  $("lbStage").classList.toggle("zoomed", zoom);
+  $("lbZoom").textContent = zoom ? "适应屏幕" : "放大 2 倍";
+  $("lbZoom").setAttribute("aria-pressed", String(zoom));
+  $("lbStage").scrollTop = 0; $("lbStage").scrollLeft = 0;
+  if (zoom && lbPlaying) { lbPlaying = false; scheduleProjection(); }
+}
+function openLightbox(list, idx, projection, album = ""){
+  if (!list || !list.length) { toast("还没有可以播放的照片"); return; }
+  lbReturnFocus = document.activeElement;
+  lbList = list; lbIdx = idx; lbAlbum = album; lbPlaying = !!projection;
   $("lightbox").classList.remove("hidden");
   $("lightbox").classList.toggle("projection", projection);
-  showLb();
-  if (projection) projTimer = setInterval(() => { lbIdx = (lbIdx+1)%lbList.length; showLb(); }, 4500);
+  $("lbProjection").hidden = !projection;
+  $("app").inert = true;
+  $("player").inert = true;
+  showLb(); scheduleProjection(); $("lbClose").focus();
 }
 function showLb(){
   const g = lbList[lbIdx];
+  setLbZoom(false);
+  $("lbImg").onerror = () => { $("lbImg").onerror = null; $("lbImg").src = "assets/placeholder.svg"; };
   $("lbImg").src = g.src;
-  $("lbImg").onerror = () => { $("lbImg").src = "assets/placeholder.svg"; };
-  $("lbCap").textContent = g.caption || "";
+  $("lbImg").alt = g.caption || g.place || "照片";
+  $("lbCap").textContent = g.caption || g.place || "";
+  $("lbCount").textContent = `${lbIdx + 1} / ${lbList.length}`;
+  $("lbCover").hidden = lbAlbum !== "gallery" || !realPhoto(g);
+  $("lbCover").textContent = albumCovers[g.place || "日常"] === g.src ? "已设为本机封面" : "设为本机封面";
+  [-1, 1].forEach(offset => {
+    const adjacent = lbList[(lbIdx + offset + lbList.length) % lbList.length];
+    if (adjacent && adjacent.src !== g.src) { const image = new Image(); image.src = adjacent.src; }
+  });
 }
-function closeLb(){ $("lightbox").classList.add("hidden"); if (projTimer){ clearInterval(projTimer); projTimer=null; } }
+function stepLb(offset){ lbIdx = (lbIdx + offset + lbList.length) % lbList.length; showLb(); }
+function closeLb(){
+  lbPlaying = false; scheduleProjection();
+  $("lightbox").classList.add("hidden");
+  $("app").inert = false; $("player").inert = false;
+  if (lbReturnFocus && lbReturnFocus.isConnected) lbReturnFocus.focus({preventScroll:true});
+  else $("backBtn").focus({preventScroll:true});
+}
 $("lbClose").addEventListener("click", closeLb);
-$("lbPrev").addEventListener("click", () => { lbIdx=(lbIdx-1+lbList.length)%lbList.length; showLb(); });
-$("lbNext").addEventListener("click", () => { lbIdx=(lbIdx+1)%lbList.length; showLb(); });
+$("lbPrev").addEventListener("click", () => { stepLb(-1); scheduleProjection(); });
+$("lbNext").addEventListener("click", () => { stepLb(1); scheduleProjection(); });
+$("lbZoom").addEventListener("click", () => setLbZoom(!lbZoom));
+$("lbImg").addEventListener("dblclick", () => setLbZoom(!lbZoom));
+$("lbPause").addEventListener("click", () => { if (!lbPlaying) setLbZoom(false); lbPlaying = !lbPlaying; scheduleProjection(); });
+$("lbSpeed").addEventListener("change", scheduleProjection);
+document.addEventListener("visibilitychange", scheduleProjection);
+$("lbCover").addEventListener("click", () => {
+  const g = lbList[lbIdx], place = g.place || "日常";
+  const next = {...albumCovers, [place]: g.src};
+  try { localStorage.setItem("albumCovers", JSON.stringify(next)); }
+  catch (_) { toast("浏览器无法保存封面，请检查存储空间"); return; }
+  albumCovers = next;
+  $("lbCover").textContent = "已设为本机封面";
+  renderGallery("gallery");
+});
+let swipeStart = null;
+$("lbStage").addEventListener("touchstart", e => {
+  swipeStart = !lbZoom && e.touches.length === 1 ? {x:e.touches[0].clientX, y:e.touches[0].clientY} : null;
+}, {passive:true});
+$("lbStage").addEventListener("touchmove", e => { if (e.touches.length !== 1) swipeStart = null; }, {passive:true});
+$("lbStage").addEventListener("touchcancel", () => { swipeStart = null; });
+$("lbStage").addEventListener("touchend", e => {
+  if (!swipeStart || lbZoom) return;
+  const dx = e.changedTouches[0].clientX - swipeStart.x, dy = e.changedTouches[0].clientY - swipeStart.y;
+  swipeStart = null;
+  if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.5) { stepLb(dx < 0 ? 1 : -1); scheduleProjection(); }
+}, {passive:true});
 document.addEventListener("keydown", e => {
   if ($("lightbox").classList.contains("hidden")) return;
-  if (e.key==="ArrowLeft") $("lbPrev").click();
-  if (e.key==="ArrowRight") $("lbNext").click();
-  if (e.key==="Escape") closeLb();
+  if (e.key === "Escape") { closeLb(); return; }
+  if (e.key === "Tab") {
+    const controls = [...$("lightbox").querySelectorAll("button, select")].filter(el => !el.hidden && el.getClientRects().length);
+    const first = controls[0], last = controls[controls.length-1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  if (e.target.tagName === "SELECT" || lbZoom) return;
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stepLb(e.key === "ArrowLeft" ? -1 : 1); scheduleProjection(); }
 });
-$("projBtn").addEventListener("click", () => openLightbox(albumCache["gallery"] || DATA.gallery, 0, true));
+$("projBtn").addEventListener("click", () => openLightbox((albumCache["gallery"] || DATA.gallery).filter(realPhoto), 0, true, "gallery"));
 
 /* ---------- 省份地图（ECharts，懒加载） ---------- */
 let chart = null;
